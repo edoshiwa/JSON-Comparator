@@ -61,6 +61,13 @@ let tableData2 = {
       space: 75651664,
       id: "b_arr_str_high",
     },
+    {
+      description:
+        "Creating print of 3 000 000 random person that are not long",
+      time: 1271318400,
+      space: 27651664,
+      id: "b_strong",
+    },
   ],
 };
 function App() {
