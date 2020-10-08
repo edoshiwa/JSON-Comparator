@@ -1,6 +1,6 @@
 import React from "react";
 import { format_time, format_space } from "./util.js";
-
+//TODO Uniqid
 function TableHead(props) {
   return <th>{props.value}</th>;
 }
@@ -22,23 +22,35 @@ function renderData(value, rowIndex, columnIndex) {
     />
   );
 }
-function renderDataKey(benchValue, id) {
-  if (benchValue.id === id) {
+function renderDataKey(bench, id) {
+  let timeValue = null;
+  bench.map((elem) => {
+    if (elem.id === id) {
+      timeValue = elem.time;
+    }
+  });
+  if (timeValue == null) {
+    return <TableData key={"des" + id} value={"—"} rowSpan={1} />;
+  } else {
     return (
-      <TableData
-        key={"des" + benchValue.id}
-        value={format_time(benchValue.time)}
-        rowSpan={1}
-      />
+      <TableData key={"des" + id} value={format_time(timeValue)} rowSpan={1} />
     );
   }
 }
-function renderDataKeySpace(benchValue, id) {
-  if (benchValue.id === id) {
+function renderDataKeySpace(bench, id) {
+  let spaceValue = null;
+  bench.map((elem) => {
+    if (elem.id === id) {
+      spaceValue = elem.space;
+    }
+  });
+  if (spaceValue == null) {
+    return <TableData key={"des" + id} value={"—"} rowSpan={1} />;
+  } else {
     return (
       <TableData
-        key={"des" + benchValue.id}
-        value={format_space(benchValue.space)}
+        key={"des" + id}
+        value={format_space(spaceValue)}
         rowSpan={1}
       />
     );
@@ -63,11 +75,12 @@ function keyMap(map, benchmarks) {
 }
 function renderBenchMap(map, benchs) {
   let data = [];
-  data = map.forEach((value, key, map) => {
-    return [
+  map.forEach((value, key, map) => {
+    data.push([
       <TableRow
         value={[
           <TableData key={"des" + key} value={value} rowSpan={2} />,
+
           benchs.map((element, index) => {
             return renderDataKey(element, key);
           }),
@@ -75,13 +88,14 @@ function renderBenchMap(map, benchs) {
       />,
       <TableRow
         value={[
-          benchs.map((element, index) => {
-            return renderDataKey(element, key);
+          benchs.map((bench, index) => {
+            return renderDataKeySpace(bench, key);
           }),
         ]}
       />,
-    ];
+    ]);
   });
+  console.log(data);
   return data;
 }
 function renderBench(bench) {
@@ -116,14 +130,31 @@ function renderBench(bench) {
   });
   return data;
 }
-
+/*
+1: Création de la map : function_id => description_bench
+  -> On parcours chaque JSON
+    -> On regarde chaque bench
+      -> On regarde si la map a déjà la clé si oui on passe, sinon on ajoute
+2: Parcours de la map, pour chaque function_id :
+  -> 2.1 : Affichage de description_bench avec rowspan = 2
+  -> 2.2 : Parcours de chaque JSON
+    -> 2.2.1 : Parcours de chaque bench, si clé du bench = function_id existe on affiche bench.time, sinon long tiret
+    -> 2.2.2 : Parcours de chaque bench, si clé du bench = function_id existe on affiche bench.space, sinon long tiret
+n : nombre de bench
+m : longeur max de bench
+Complexité max O(nm+2nm²), compléxité quadratique
+*/
 const Table = (props) => {
   const { tableData } = props;
   const bench = tableData.bench;
   const bench2 = tableData.bench2;
   let map = new Map();
+  keyMap(map, bench);
   keyMap(map, bench2);
-  console.log(map);
+
+  /* map.forEach((element, key) =>
+    console.log(<TableData key={"des" + key} value={element} rowSpan={2} />)
+  );*/
   let description = bench.map((element) => element.description);
 
   return (
