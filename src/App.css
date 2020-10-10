@@ -1,38 +1,54 @@
-.App {
+@import "~antd/dist/antd.css";
+
+.vide {
+  background-color: rgba(127, 127, 130, 0.699);
+}
+
+.description {
+  text-align: left;
+  vertical-align: middle;
+  background-color: rgba(255, 255, 255, 0.541);
+  color: rgb(41, 62, 81);
+  font-weight: 800;
+  border: 1px solid black;
+  white-space: pre-line;
+}
+
+table {
+  border: 1px solid black;
+}
+table,
+td,
+th {
+  color: rgb(89, 89, 91);
+  padding: 5px;
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 12pt;
+}
+td {
   text-align: center;
+  border-right: 1px solid black;
+  white-space: nowrap;
 }
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+th {
+  border: 1px solid black;
+  background: radial-gradient(#007d82, #009d63);
   color: white;
+  font-weight: 800;
+  white-space: pre-line;
 }
 
-.App-link {
-  color: #61dafb;
+.bottow-row {
+  border-bottom: 1px solid black;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+#Wrapper {
+  text-align: center;
+  overflow: hidden; /* add this to contain floated children */
+}
+#first {
+  float: left; /* add this */
+}
+#second {
+  float: left; /* add this */
 }

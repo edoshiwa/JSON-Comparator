@@ -1,26 +1,27 @@
-import React from "react";
+import React, { useState } from "react";
 import { format_time, format_space } from "./util.js";
+import JsonSelector from "./json-selector.js";
 //TODO Uniqid
+var uniqid = require("uniqid");
 function TableHead(props) {
-  return <th>{props.value}</th>;
+  return <th scope="col">{props.value}</th>;
 }
 
 function TableRow(props) {
-  return <tr>{props.value}</tr>;
+  return <tr className={props.className}>{props.value}</tr>;
 }
 function TableData(props) {
-  return <td rowSpan={props.rowSpan}>{props.value}</td>;
+  return (
+    <td className={props.className} rowSpan={props.rowSpan}>
+      {props.value}
+    </td>
+  );
 }
 function renderHead(value, index) {
   return <TableHead key={"h" + index.toString()} value={value} />;
 }
 function renderData(value, rowIndex, columnIndex) {
-  return (
-    <TableData
-      key={"i" + rowIndex.toString() + "j" + columnIndex.toString()}
-      value={value}
-    />
-  );
+  return <TableData key={uniqid()} value={value} />;
 }
 function renderDataKey(bench, id) {
   let timeValue = null;
@@ -30,10 +31,12 @@ function renderDataKey(bench, id) {
     }
   });
   if (timeValue == null) {
-    return <TableData key={"des" + id} value={"—"} rowSpan={1} />;
+    return (
+      <TableData key={uniqid()} value={"—"} rowSpan={1} className="vide" />
+    );
   } else {
     return (
-      <TableData key={"des" + id} value={format_time(timeValue)} rowSpan={1} />
+      <TableData key={uniqid()} value={format_time(timeValue)} rowSpan={1} />
     );
   }
 }
@@ -45,21 +48,19 @@ function renderDataKeySpace(bench, id) {
     }
   });
   if (spaceValue == null) {
-    return <TableData key={"des" + id} value={"—"} rowSpan={1} />;
+    return (
+      <TableData key={uniqid()} value={"—"} rowSpan={1} className="vide" />
+    );
   } else {
     return (
-      <TableData
-        key={"des" + id}
-        value={format_space(spaceValue)}
-        rowSpan={1}
-      />
+      <TableData key={uniqid()} value={format_space(spaceValue)} rowSpan={1} />
     );
   }
 }
 function renderRow(row, rowIndex) {
   return (
     <TableRow
-      key={"r" + rowIndex.toString()}
+      key={uniqid()}
       value={row.map((value, columnIndex) =>
         renderData(value, rowIndex, columnIndex)
       )}
@@ -78,8 +79,14 @@ function renderBenchMap(map, benchs) {
   map.forEach((value, key, map) => {
     data.push([
       <TableRow
+        key={uniqid()}
         value={[
-          <TableData key={"des" + key} value={value} rowSpan={2} />,
+          <TableData
+            key={uniqid()}
+            value={value}
+            rowSpan={2}
+            className="description"
+          />,
 
           benchs.map((element, index) => {
             return renderDataKey(element, key);
@@ -87,6 +94,8 @@ function renderBenchMap(map, benchs) {
         ]}
       />,
       <TableRow
+        key={uniqid()}
+        className="bottow-row"
         value={[
           benchs.map((bench, index) => {
             return renderDataKeySpace(bench, key);
@@ -95,41 +104,10 @@ function renderBenchMap(map, benchs) {
       />,
     ]);
   });
-  console.log(data);
+  //console.log(data);
   return data;
 }
-function renderBench(bench) {
-  let data = [];
-  data = bench.map((bench, index) => {
-    return [
-      <TableRow
-        value={[
-          <TableData
-            key={"des" + bench.id}
-            value={bench.description}
-            rowSpan={2}
-          />,
 
-          <TableData
-            key={"time" + bench.id}
-            value={format_time(bench.time)}
-            rowSpan={1}
-          />,
-        ]}
-      />,
-      <TableRow
-        value={[
-          <TableData
-            key={"space" + bench.id}
-            value={format_space(bench.space)}
-            rowSpan={1}
-          />,
-        ]}
-      />,
-    ];
-  });
-  return data;
-}
 /*
 1: Création de la map : function_id => description_bench
   -> On parcours chaque JSON
@@ -144,28 +122,59 @@ n : nombre de bench
 m : longeur max de bench
 Complexité max O(nm+2nm²), compléxité quadratique
 */
+/*class Table extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      tableData: this.props.tableData,
+      map: new Map(),
+      jsons: this.props.jsons,
+    };
+  }
+  render() {
+    return (
+      <div>
+        <table className="">
+          <thead className="">
+            <tr>
+              {tableData.thead.map((element, index) =>
+                renderHead(element, index)
+              )}
+            </tr>
+          </thead>
+          <tbody>{renderBenchMap(map, benchs)}</tbody>
+        </table>
+      </div>
+    );
+  }
+}*/
 const Table = (props) => {
   const { tableData } = props;
+  const { thead } = props;
+  console.log(thead);
+  const jsons = props.jsons;
   const bench = tableData.bench;
   const bench2 = tableData.bench2;
+  const benchs = [];
+  jsons.forEach((e) => benchs.push(e.bench));
+  //console.log(jsons);
+  //benchs.push(bench);
+  //benchs.push(bench2);
   let map = new Map();
-  keyMap(map, bench);
-  keyMap(map, bench2);
-
-  /* map.forEach((element, key) =>
-    console.log(<TableData key={"des" + key} value={element} rowSpan={2} />)
-  );*/
-  let description = bench.map((element) => element.description);
+  benchs.forEach((el) => keyMap(map, el));
 
   return (
-    <table>
-      <thead>
-        <tr>
-          {tableData.thead.map((element, index) => renderHead(element, index))}
-        </tr>
-      </thead>
-      <tbody>{renderBenchMap(map, [bench, bench2])}</tbody>
-    </table>
+    <div>
+      <table className="">
+        <thead className="">
+          <tr>
+            <th>Bench description</th>
+            {thead.map((element, index) => renderHead(element, index))}
+          </tr>
+        </thead>
+        <tbody>{renderBenchMap(map, benchs)}</tbody>
+      </table>
+    </div>
   );
 };
 

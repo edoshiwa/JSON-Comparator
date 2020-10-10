@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
+import JsonSelector from "./json-selector.js";
 import Table from "./Table.js";
-
+var uniqid = require("uniqid");
 let tableData2 = {
   thead: ["Description", "Fichier 1", "Fichier 2"],
   bench: [
@@ -49,17 +50,17 @@ let tableData2 = {
   bench2: [
     {
       description:
-        "Creating array of 100 000 random strings that are 14 chars long",
+        "RAND Creating array of 100 000 random strings that are 14 chars long",
       time: 51740100,
       space: 10291536,
-      id: "b_arr_str_low",
+      id: "b_arr_str_low2",
     },
     {
       description:
-        "Creating array of 1 000 000 random strings that are 14 chars long",
+        "RAND Creating array of 1 000 000 random strings that are 14 chars long",
       time: 571318400,
       space: 75651664,
-      id: "b_arr_str_high",
+      id: "b_arr_str_high2",
     },
     {
       description:
@@ -70,8 +71,21 @@ let tableData2 = {
     },
   ],
 };
+let JSONs = [];
+function updateTableData(JSON) {
+  JSONs.push(JSON);
+}
+
+//<Table tableData={tableData2}/>
 function App() {
-  return <Table tableData={tableData2} />;
+  const [jsons, setJsons] = useState(JSONs);
+
+  return (
+    <div className="App">
+      <JsonSelector key={uniqid()} update={updateTableData} />
+      <Table key={uniqid()} tableData={tableData2} jsons={jsons} />
+    </div>
+  );
 }
 
 export default App;
