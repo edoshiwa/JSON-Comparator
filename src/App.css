@@ -50,5 +50,16 @@ th {
   float: left; /* add this */
 }
 #second {
+  padding: 10px;
   float: left; /* add this */
+}
+h1 {
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 24pt;
+  font-weight: 800;
+  color: rgb(41, 62, 81);
+}
+
+body {
+  padding: 10px;
 }
