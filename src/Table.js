@@ -35,7 +35,6 @@ function renderHeaderWithDel(
   swapFunction,
   tabLenght
 ) {
-  console.log("tablenght =" + tabLenght);
   let debut =
     index === 0 ? null : (
       <button
@@ -170,7 +169,11 @@ function renderBenchInfo(benchs) {
           value={"Version"}
         />,
         benchs.map((bench, index) => (
-          <TableData key={uniqid()} className={"informationData"} value={bench.platform.version} />
+          <TableData
+            key={uniqid()}
+            className={"informationData"}
+            value={bench.platform.version}
+          />
         )),
       ]}
     />
@@ -181,7 +184,11 @@ function renderBenchInfo(benchs) {
       value={[
         <TableData className={"information"} key={uniqid()} value={"Time"} />,
         benchs.map((bench, index) => (
-          <TableData key={uniqid()} className={"informationData"} value={bench.time} />
+          <TableData
+            key={uniqid()}
+            className={"informationData"}
+            value={(Date(bench.time))}
+          />
         )),
       ]}
     />
@@ -192,7 +199,11 @@ function renderBenchInfo(benchs) {
       value={[
         <TableData className={"information"} key={uniqid()} value={"OS"} />,
         benchs.map((bench, index) => (
-          <TableData key={uniqid()} className={"informationData"} value={bench.platform.OS} />
+          <TableData
+            key={uniqid()}
+            className={"informationData"}
+            value={bench.platform.OS}
+          />
         )),
       ]}
     />
@@ -203,7 +214,11 @@ function renderBenchInfo(benchs) {
       value={[
         <TableData className={"information"} key={uniqid()} value={"Type"} />,
         benchs.map((bench, index) => (
-          <TableData key={uniqid()}  className={"informationData"} value={bench.platform.type} />
+          <TableData
+            key={uniqid()}
+            className={"informationData"}
+            value={bench.platform.type}
+          />
         )),
       ]}
     />
@@ -214,12 +229,15 @@ function renderBenchInfo(benchs) {
       value={[
         <TableData className={"information"} key={uniqid()} value={"uname"} />,
         benchs.map((bench, index) => (
-          <TableData key={uniqid()} className={"informationData"} value={bench.platform.uname} />
+          <TableData
+            key={uniqid()}
+            className={"informationData"}
+            value={bench.platform.uname}
+          />
         )),
       ]}
     />
   );
-  console.log(data);
   return data;
 }
 /*
@@ -239,43 +257,46 @@ Complexité max O(nm+2nm²), compléxité quadratique
 
 const Table = (props) => {
   const { thead } = props;
-  console.log(thead);
   const jsons = props.jsons;
   const benchs = [];
   jsons.forEach((e) => benchs.push(e.bench));
   let map = new Map();
   benchs.forEach((el) => keyMap(map, el));
   const deleteColumn = (key) => {
+    console.log("deleting colum :" + key)
     props.deleteJson(key);
   };
   const swapColumn = (a, b) => {
     props.swapJson(a, b);
   };
   renderBenchInfo(jsons);
-  return (
-    <div>
-      <table className="">
-        <thead className="">
-          <tr>
-            <th>Bench description</th>
-            {thead.map((element, index) =>
-              renderHeaderWithDel(
-                element,
-                index,
-                deleteColumn,
-                swapColumn,
-                thead.length
-              )
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {renderBenchInfo(jsons)}
-          {renderBenchMap(map, benchs)}
-        </tbody>
-      </table>
-    </div>
-  );
+  if (jsons.length > 0) {
+    return (
+      <div>
+        <table className="">
+          <thead className="">
+            <tr>
+              <th>Bench description</th>
+              {thead.map((element, index) =>
+                renderHeaderWithDel(
+                  element,
+                  index,
+                  deleteColumn,
+                  swapColumn,
+                  thead.length
+                )
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {renderBenchInfo(jsons)}
+            {renderBenchMap(map, benchs)}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+  else return null;
 };
 
 export default Table;

@@ -6,7 +6,7 @@ import "./App.css";
 //DONE header plutot thead
 //TODO gestion erreur
 //DONE découpé en haut
-//TODO auto refresh - quand dropdown ouvre fetch
+//DONE auto refresh - quand dropdown ouvre fetch
 //TODO C#
 //DONE déplacé colonne
 var uniqid = require("uniqid");
@@ -28,26 +28,43 @@ class JsonSelector extends React.Component {
     this.onClick = this.onClick.bind(this);
     this.deleteJson = this.deleteJson.bind(this);
     this.swapJson = this.swapJson.bind(this);
+    this.fetchJsonList = this.fetchJsonList.bind(this);
 
     this.state = {
       menu: [],
       jsonFileName: [],
+      lastJsonFetch: null,
       jsonArray: [],
       jsonArrayHeader: [],
     };
   }
+  fetchJsonList = () => {
+    if (
+      this.state.lastJsonFetch == null ||
+      Date.now() - this.state.lastJsonFetch > 5000
+    ) {
+      fetch(localUrl + apiUrl)
+        .then((response) => response.json())
+        .then((res) =>
+          this.setState({
+            menu: this.updateMenu(res),
+            jsonFileName: res,
+            lastJsonFetch: Date.now(),
+          })
+        );
+      console.log(Date.now() + "fetching...");
+    }
+    else this.setState({menu: this.updateMenu(this.state.jsonFileName)});
+  };
   componentDidMount() {
-    fetch(localUrl + apiUrl)
-      .then((response) => response.json())
-      .then((res) =>
-        this.setState({ menu: this.updateMenu(res), jsonFileName: res })
-      );
+    this.fetchJsonList();
   }
+
   updateMenu(arr) {
     return (
       <Menu onClick={this.onClick}>
         {arr.map((element, index) => (
-          <Menu.Item key={index} title={element}>
+          <Menu.Item key={index} title={element} disabled={(this.state.jsonArrayHeader.includes(element)?true:false)}>
             {element}
           </Menu.Item>
         ))}
@@ -68,7 +85,8 @@ class JsonSelector extends React.Component {
       });
     //message.info(`Click on item ${this.state.jsonName[key]}`);
   };
-  deleteJson = ({ key }) => {
+  deleteJson = ( key ) => {
+    console.log("deleting : "+key);
     let arr = this.state.jsonArray;
     arr.splice(key, 1);
     let header = this.state.jsonArrayHeader;
@@ -96,16 +114,10 @@ class JsonSelector extends React.Component {
         <Divider />
         <div id="Wrapper">
           <div id="first">
-            <Table
-              key={uniqid()}
-              thead={this.state.jsonArrayHeader}
-              jsons={this.state.jsonArray}
-              deleteJson={this.deleteJson}
-              swapJson={this.swapJson}
-            />
-          </div>
-          <div id="second">
-            <Dropdown overlay={this.state.menu}>
+            <Dropdown
+              overlay={this.state.menu}
+              onVisibleChange={() => this.fetchJsonList()}
+            >
               <a
                 className="ant-dropdown-link"
                 onClick={(e) => e.preventDefault()}
@@ -113,6 +125,21 @@ class JsonSelector extends React.Component {
                 Select JSON <DownOutlined />
               </a>
             </Dropdown>
+            <form onSubmit={this.handleSubmit}>
+        <label>
+          Envoyer un fichier :
+          <input type="file" ref={this.fileInput} />
+        </label>
+      </form>
+          </div>
+          <div id="second">
+            <Table
+              key={uniqid()}
+              thead={this.state.jsonArrayHeader}
+              jsons={this.state.jsonArray}
+              deleteJson={this.deleteJson}
+              swapJson={this.swapJson}
+            />
           </div>
         </div>
       </div>

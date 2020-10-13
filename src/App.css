@@ -59,6 +59,7 @@ td {
   white-space: nowrap;
 }
 th {
+  text-align: center;
   border: 1px solid black;
   background: radial-gradient(#007d82, #009d63);
   color: white;
@@ -71,15 +72,20 @@ th {
 }
 
 #Wrapper {
-  text-align: center;
+  width: 99%;
+  margin: auto;
+  padding: 10 px;
   overflow: hidden; /* add this to contain floated children */
 }
 #first {
-  float: left; /* add this */
+  float: none; /* add this */
+  color: rgb(41, 62, 81);
+  font-weight: 800;
+  font-size: 12pt;
+  font-family: "Source Sans Pro", sans-serif;
 }
 #second {
-  padding: 10px;
-  float: left; /* add this */
+  max-width: 90%;
 }
 h1 {
   font-family: "Source Sans Pro", sans-serif;
