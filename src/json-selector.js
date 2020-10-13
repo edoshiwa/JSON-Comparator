@@ -1,5 +1,5 @@
 import { Menu, Dropdown, Divider } from "antd";
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, UploadOutlined } from "@ant-design/icons";
 import React from "react";
 import Table from "./Table.js";
 import "./App.css";
@@ -8,7 +8,11 @@ import "./App.css";
 //DONE découpé en haut
 //DONE auto refresh - quand dropdown ouvre fetch
 //TODO C#
+//TODO Groupage JSON
+//Verification JSON
+//Input serveur distant
 //DONE déplacé colonne
+//TODO promises readfile
 var uniqid = require("uniqid");
 const localUrl = "http://localhost/benchmark/";
 const apiUrl = "comparator/api.php";
@@ -29,7 +33,7 @@ class JsonSelector extends React.Component {
     this.deleteJson = this.deleteJson.bind(this);
     this.swapJson = this.swapJson.bind(this);
     this.fetchJsonList = this.fetchJsonList.bind(this);
-
+    this.handlefile = this.handlefile.bind(this);
     this.state = {
       menu: [],
       jsonFileName: [],
@@ -53,8 +57,7 @@ class JsonSelector extends React.Component {
           })
         );
       console.log(Date.now() + "fetching...");
-    }
-    else this.setState({menu: this.updateMenu(this.state.jsonFileName)});
+    } else this.setState({ menu: this.updateMenu(this.state.jsonFileName) });
   };
   componentDidMount() {
     this.fetchJsonList();
@@ -64,7 +67,13 @@ class JsonSelector extends React.Component {
     return (
       <Menu onClick={this.onClick}>
         {arr.map((element, index) => (
-          <Menu.Item key={index} title={element} disabled={(this.state.jsonArrayHeader.includes(element)?true:false)}>
+          <Menu.Item
+            key={index}
+            title={element}
+            disabled={
+              this.state.jsonArrayHeader.includes(element) ? true : false
+            }
+          >
             {element}
           </Menu.Item>
         ))}
@@ -85,8 +94,8 @@ class JsonSelector extends React.Component {
       });
     //message.info(`Click on item ${this.state.jsonName[key]}`);
   };
-  deleteJson = ( key ) => {
-    console.log("deleting : "+key);
+  deleteJson = (key) => {
+    console.log("deleting : " + key);
     let arr = this.state.jsonArray;
     arr.splice(key, 1);
     let header = this.state.jsonArrayHeader;
@@ -106,6 +115,23 @@ class JsonSelector extends React.Component {
 
     this.setState({ jsonArray: arr, jsonArrayHeader: header });
   };
+  handlefile = async (e) => {
+    let files = this.state.jsonArray;
+    let filesName = this.state.jsonArrayHeader;
+    for (let index = 0; index < e.target.files.length; index++) {
+      filesName.push(
+        e.target.files[index].name.split(".").slice(0, -1).join(".")
+      );
+
+      let reader = new FileReader();
+      reader.onloadend = (e) => {
+        const jsonTest = JSON.parse(e.target.result);
+        files.push(jsonTest);
+      };
+      reader.readAsText(e.target.files[index]);
+    }
+    this.setState({ jsonArray: files, jsonArrayHeader: filesName });
+  };
 
   render() {
     return (
@@ -122,16 +148,33 @@ class JsonSelector extends React.Component {
                 className="ant-dropdown-link"
                 onClick={(e) => e.preventDefault()}
               >
-                Select JSON <DownOutlined />
+                Select JSON from server <DownOutlined />
               </a>
             </Dropdown>
-            <form onSubmit={this.handleSubmit}>
-        <label>
-          Envoyer un fichier :
-          <input type="file" ref={this.fileInput} />
-        </label>
-      </form>
+            <label htmlFor="dirpicker" className="input-btn">
+              Select local JSON directory <UploadOutlined />
+            </label>
+            <input
+              type="file"
+              id="dirpicker"
+              name="fileList"
+              directory=""
+              webkitdirectory=""
+              onChange={(e) => this.handlefile(e)}
+            />
+            <label htmlFor="filepicker" className="input-btn">
+              Select local JSON file(s) <UploadOutlined />
+            </label>
+            <input
+              type="file"
+              id="filepicker"
+              name="fileList"
+              multiple=""
+              accept=".json"
+              onChange={(e) => this.handlefile(e)}
+            />
           </div>
+          <Divider />
           <div id="second">
             <Table
               key={uniqid()}

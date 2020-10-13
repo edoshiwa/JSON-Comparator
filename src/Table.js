@@ -187,7 +187,7 @@ function renderBenchInfo(benchs) {
           <TableData
             key={uniqid()}
             className={"informationData"}
-            value={(Date(bench.time))}
+            value={(bench.time)}
           />
         )),
       ]}

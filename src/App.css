@@ -79,13 +79,14 @@ th {
 }
 #first {
   float: none; /* add this */
+  text-align: center;
   color: rgb(41, 62, 81);
   font-weight: 800;
   font-size: 12pt;
   font-family: "Source Sans Pro", sans-serif;
 }
 #second {
-  max-width: 90%;
+  text-align: center;
 }
 h1 {
   font-family: "Source Sans Pro", sans-serif;
@@ -95,5 +96,24 @@ h1 {
 }
 
 body {
+  padding: 10px;
+}
+
+#filepicker,
+#dirpicker {
+  display: none;
+}
+.input-btn {
+  margin: 12px;
+  padding: 12px;
+  cursor: pointer;
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 12pt;
+  font-weight: 800;
+  color: rgb(41, 62, 81);
+}
+.input-btn:hover {
+  border: 2px solid rgb(41, 62, 81);
+  border-radius: 12px;
   padding: 10px;
 }
