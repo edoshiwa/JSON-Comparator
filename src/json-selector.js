@@ -3,14 +3,16 @@ import { DownOutlined } from "@ant-design/icons";
 import React from "react";
 import Table from "./Table.js";
 import "./App.css";
-//TODO header plutot thead
+//DONE header plutot thead
 //TODO gestion erreur
-//TODO url découpé en haut
+//DONE découpé en haut
 //TODO auto refresh - quand dropdown ouvre fetch
 //TODO C#
-//TODO déplacé colonne
+//DONE déplacé colonne
 var uniqid = require("uniqid");
-
+const localUrl = "http://localhost/benchmark/";
+const apiUrl = "comparator/api.php";
+const urlParameters = "?name=";
 /*const menu = (
   <Menu onClick={onClick}>
     <Menu.Item key="1">1st menu item</Menu.Item>
@@ -22,19 +24,23 @@ var uniqid = require("uniqid");
 class JsonSelector extends React.Component {
   constructor(props) {
     super();
+
     this.onClick = this.onClick.bind(this);
+    this.deleteJson = this.deleteJson.bind(this);
+    this.swapJson = this.swapJson.bind(this);
+
     this.state = {
       menu: [],
-      jsonName: [],
-      jsons: Array(),
-      jsonsThead: [],
+      jsonFileName: [],
+      jsonArray: [],
+      jsonArrayHeader: [],
     };
   }
   componentDidMount() {
-    fetch("http://localhost/us987/comparator/api.php")
+    fetch(localUrl + apiUrl)
       .then((response) => response.json())
       .then((res) =>
-        this.setState({ menu: this.updateMenu(res), jsonName: res })
+        this.setState({ menu: this.updateMenu(res), jsonFileName: res })
       );
   }
   updateMenu(arr) {
@@ -50,18 +56,39 @@ class JsonSelector extends React.Component {
   }
   onClick = ({ key }) => {
     fetch(
-      "http://localhost/us987/comparator/api.php?name=".concat(
-        this.state.jsonName[key]
-      )
+      (localUrl + apiUrl + urlParameters).concat(this.state.jsonFileName[key])
     )
       .then((response) => response.json())
       .then((res) => {
-        let arr = this.state.jsons.concat(res);
-        let arrThead = this.state.jsonsThead.concat(this.state.jsonName[key]);
-        this.setState({ jsons: arr, jsonsThead: arrThead });
+        let arr = this.state.jsonArray.concat(res);
+        let arrThead = this.state.jsonArrayHeader.concat(
+          this.state.jsonFileName[key]
+        );
+        this.setState({ jsonArray: arr, jsonArrayHeader: arrThead });
       });
     //message.info(`Click on item ${this.state.jsonName[key]}`);
   };
+  deleteJson = ({ key }) => {
+    let arr = this.state.jsonArray;
+    arr.splice(key, 1);
+    let header = this.state.jsonArrayHeader;
+    header.splice(key, 1);
+    this.setState({ jsonArray: arr, jsonArrayHeader: header });
+  };
+  swapJson = (firstIndex, secondIndex) => {
+    let arr = this.state.jsonArray;
+    let header = this.state.jsonArrayHeader;
+    let tmp = arr[firstIndex];
+    arr[firstIndex] = arr[secondIndex];
+    arr[secondIndex] = tmp;
+
+    tmp = header[firstIndex];
+    header[firstIndex] = header[secondIndex];
+    header[secondIndex] = tmp;
+
+    this.setState({ jsonArray: arr, jsonArrayHeader: header });
+  };
+
   render() {
     return (
       <div>
@@ -71,8 +98,10 @@ class JsonSelector extends React.Component {
           <div id="first">
             <Table
               key={uniqid()}
-              thead={this.state.jsonsThead}
-              jsons={this.state.jsons}
+              thead={this.state.jsonArrayHeader}
+              jsons={this.state.jsonArray}
+              deleteJson={this.deleteJson}
+              swapJson={this.swapJson}
             />
           </div>
           <div id="second">
