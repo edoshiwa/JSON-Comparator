@@ -1,7 +1,9 @@
 import React from "react";
 import { format_time, format_space } from "./util.js";
-//TODO render platform info
-//TODO add del function with json selector
+import { DeleteOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+
+//DONE render platform info
+//DONE del function
 
 //function to create unique key for react
 var uniqid = require("uniqid");
@@ -23,11 +25,54 @@ function TableData(props) {
   );
 }
 //render the generated th
-function renderHead(value, index) {
+function renderHead(value, index, popFunction) {
   return <TableHead key={"h" + index.toString()} value={value} />;
 }
+function renderHeaderWithDel(
+  value,
+  index,
+  popFunction,
+  swapFunction,
+  tabLenght
+) {
+  console.log("tablenght =" + tabLenght);
+  let debut =
+    index === 0 ? null : (
+      <button
+        className="swapLeft"
+        onClick={() => swapFunction(index - 1, index)}
+      >
+        {<LeftOutlined />}
+      </button>
+    );
+  let fin =
+    index === tabLenght - 1 ? null : (
+      <button
+        className="swapRight"
+        onClick={() => swapFunction(index, index + 1)}
+      >
+        {<RightOutlined />}
+      </button>
+    );
+  let val = (
+    <div>
+      {debut}
+      {value}
+      <button
+        className="del"
+        onClick={() => popFunction(index)}
+        shape="circle"
+        ghost="true"
+      >
+        {<DeleteOutlined />}
+      </button>
+      {fin}
+    </div>
+  );
+  return <TableHead key={"h" + index.toString()} value={val} />;
+}
 //render the generated td
-function renderData(value, rowIndex, columnIndex) {
+function renderData(value) {
   return <TableData key={uniqid()} value={value} />;
 }
 //render td if time data exist with associate id
@@ -67,14 +112,9 @@ function renderDataKeySpace(bench, id) {
     );
   }
 }
-function renderRow(row, rowIndex) {
+function renderRow(row) {
   return (
-    <TableRow
-      key={uniqid()}
-      value={row.map((value, columnIndex) =>
-        renderData(value, rowIndex, columnIndex)
-      )}
-    />
+    <TableRow key={uniqid()} value={row.map((value) => renderData(value))} />
   );
 }
 //Generate a key map from benchmark to know the id and the description of all benchmark
@@ -118,7 +158,70 @@ function renderBenchMap(map, benchs) {
   });
   return data;
 }
-
+function renderBenchInfo(benchs) {
+  let data = [];
+  data.push(
+    <TableRow
+      key={uniqid()}
+      value={[
+        <TableData
+          className={"information"}
+          key={uniqid()}
+          value={"Version"}
+        />,
+        benchs.map((bench, index) => (
+          <TableData key={uniqid()} className={"informationData"} value={bench.platform.version} />
+        )),
+      ]}
+    />
+  );
+  data.push(
+    <TableRow
+      key={uniqid()}
+      value={[
+        <TableData className={"information"} key={uniqid()} value={"Time"} />,
+        benchs.map((bench, index) => (
+          <TableData key={uniqid()} className={"informationData"} value={bench.time} />
+        )),
+      ]}
+    />
+  );
+  data.push(
+    <TableRow
+      key={uniqid()}
+      value={[
+        <TableData className={"information"} key={uniqid()} value={"OS"} />,
+        benchs.map((bench, index) => (
+          <TableData key={uniqid()} className={"informationData"} value={bench.platform.OS} />
+        )),
+      ]}
+    />
+  );
+  data.push(
+    <TableRow
+      key={uniqid()}
+      value={[
+        <TableData className={"information"} key={uniqid()} value={"Type"} />,
+        benchs.map((bench, index) => (
+          <TableData key={uniqid()}  className={"informationData"} value={bench.platform.type} />
+        )),
+      ]}
+    />
+  );
+  data.push(
+    <TableRow
+      key={uniqid()}
+      value={[
+        <TableData className={"information"} key={uniqid()} value={"uname"} />,
+        benchs.map((bench, index) => (
+          <TableData key={uniqid()} className={"informationData"} value={bench.platform.uname} />
+        )),
+      ]}
+    />
+  );
+  console.log(data);
+  return data;
+}
 /*
 1: Création de la map : function_id => description_bench
   -> On parcours chaque JSON
@@ -142,17 +245,34 @@ const Table = (props) => {
   jsons.forEach((e) => benchs.push(e.bench));
   let map = new Map();
   benchs.forEach((el) => keyMap(map, el));
-
+  const deleteColumn = (key) => {
+    props.deleteJson(key);
+  };
+  const swapColumn = (a, b) => {
+    props.swapJson(a, b);
+  };
+  renderBenchInfo(jsons);
   return (
     <div>
       <table className="">
         <thead className="">
           <tr>
             <th>Bench description</th>
-            {thead.map((element, index) => renderHead(element, index))}
+            {thead.map((element, index) =>
+              renderHeaderWithDel(
+                element,
+                index,
+                deleteColumn,
+                swapColumn,
+                thead.length
+              )
+            )}
           </tr>
         </thead>
-        <tbody>{renderBenchMap(map, benchs)}</tbody>
+        <tbody>
+          {renderBenchInfo(jsons)}
+          {renderBenchMap(map, benchs)}
+        </tbody>
       </table>
     </div>
   );

@@ -13,6 +13,34 @@
   border: 1px solid black;
   white-space: pre-line;
 }
+.information {
+  text-align: right;
+  vertical-align: middle;
+  background-color: rgba(255, 255, 255, 0.541);
+  color: rgb(41, 62, 81);
+  font-weight: 800;
+  border: 1px solid black;
+}
+.informationData {
+  text-align: center;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  border: 1px solid black;
+}
+.del,
+.swapLeft,
+.swapRight {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.del:hover,
+.swapLeft:hover,
+.swapRight:hover {
+  background-color: white;
+  color: rgb(0, 125, 130);
+}
 
 table {
   border: 1px solid black;
