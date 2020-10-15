@@ -1,7 +1,19 @@
 import React from "react";
 import { format_time, format_space } from "./util.js";
 import { DeleteOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import styled from "styled-components";
+import { Droppable } from "react-beautiful-dnd";
+import DraggableTable from "./Draggable-Table.jsx";
 
+const TableList = styled.div`
+  padding: 8px;
+  background-color: ${(props) => (props.isDraggingOver ? "green" : "white")};
+  display: flex;
+`;
+const Container = styled.div`
+    margin 8px;
+    border: 1px solid lightgrey;
+    border-radius: 2px`;
 //DONE render platform info
 //DONE del function
 
@@ -9,7 +21,11 @@ import { DeleteOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 var uniqid = require("uniqid");
 //Generate a th and give the col scope
 function TableHead(props) {
-  return <th scope="col">{props.value}</th>;
+  return (
+    <th draggable="true" scope="col">
+      {props.value}
+    </th>
+  );
 }
 
 //Generate a row from multiple th or td
@@ -187,7 +203,7 @@ function renderBenchInfo(benchs) {
           <TableData
             key={uniqid()}
             className={"informationData"}
-            value={(bench.time)}
+            value={bench.time}
           />
         )),
       ]}
@@ -263,7 +279,7 @@ const Table = (props) => {
   let map = new Map();
   benchs.forEach((el) => keyMap(map, el));
   const deleteColumn = (key) => {
-    console.log("deleting colum :" + key)
+    console.log("deleting colum :" + key);
     props.deleteJson(key);
   };
   const swapColumn = (a, b) => {
@@ -271,12 +287,15 @@ const Table = (props) => {
   };
   renderBenchInfo(jsons);
   if (jsons.length > 0) {
-    return (
-      <div>
-        <table className="">
+    /*return (
+      <div className="div-table">
+        <table className="table-description">
           <thead className="">
             <tr>
               <th>Bench description</th>
+            </tr>
+            <tbody>{renderBenchMap(map, [])}</tbody>
+            <tr>
               {thead.map((element, index) =>
                 renderHeaderWithDel(
                   element,
@@ -294,9 +313,28 @@ const Table = (props) => {
           </tbody>
         </table>
       </div>
+    );*/
+    return (
+      <Container>
+        <Droppable droppableId={uniqid()} direction="horizontal">
+          {(provided, snapshot) => (
+            <TableList ref={provided.innerRef} {...provided.droppableProps}>
+              {jsons.map((json, index) => (
+                <DraggableTable
+                  key={thead[index]}
+                  name={thead[index]}
+                  json={json}
+                  index={index}
+                  map={map}
+                />
+              ))}
+              {provided.placeholder}
+            </TableList>
+          )}
+        </Droppable>
+      </Container>
     );
-  }
-  else return null;
+  } else return null;
 };
 
 export default Table;

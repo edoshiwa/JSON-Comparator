@@ -1,5 +1,6 @@
 import { Menu, Dropdown, Divider } from "antd";
 import { DownOutlined, UploadOutlined } from "@ant-design/icons";
+import { DragDropContext } from "react-beautiful-dnd";
 import React from "react";
 import Table from "./Table.js";
 import "./App.css";
@@ -12,18 +13,11 @@ import "./App.css";
 //Verification JSON
 //Input serveur distant
 //DONE déplacé colonne
-//TODO promises readfile
+//DONE promises readfile
 var uniqid = require("uniqid");
 const localUrl = "http://localhost/benchmark/";
 const apiUrl = "comparator/api.php";
 const urlParameters = "?name=";
-/*const menu = (
-  <Menu onClick={onClick}>
-    <Menu.Item key="1">1st menu item</Menu.Item>
-    <Menu.Item key="2">2nd memu item</Menu.Item>
-    <Menu.Item key="3">3rd menu item</Menu.Item>
-  </Menu>
-);*/
 
 class JsonSelector extends React.Component {
   constructor(props) {
@@ -116,9 +110,9 @@ class JsonSelector extends React.Component {
     this.setState({ jsonArray: arr, jsonArrayHeader: header });
   };
   handlefile = async (e) => {
-    let files = this.state.jsonArray;
-    let filesName = this.state.jsonArrayHeader;
     for (let index = 0; index < e.target.files.length; index++) {
+      let files = this.state.jsonArray;
+      let filesName = this.state.jsonArrayHeader;
       filesName.push(
         e.target.files[index].name.split(".").slice(0, -1).join(".")
       );
@@ -127,10 +121,10 @@ class JsonSelector extends React.Component {
       reader.onloadend = (e) => {
         const jsonTest = JSON.parse(e.target.result);
         files.push(jsonTest);
+        this.setState({ jsonArray: files, jsonArrayHeader: filesName });
       };
       reader.readAsText(e.target.files[index]);
     }
-    this.setState({ jsonArray: files, jsonArrayHeader: filesName });
   };
 
   render() {
@@ -176,13 +170,17 @@ class JsonSelector extends React.Component {
           </div>
           <Divider />
           <div id="second">
-            <Table
-              key={uniqid()}
-              thead={this.state.jsonArrayHeader}
-              jsons={this.state.jsonArray}
-              deleteJson={this.deleteJson}
-              swapJson={this.swapJson}
-            />
+            <DragDropContext>
+              {
+                <Table
+                  key={uniqid()}
+                  thead={this.state.jsonArrayHeader}
+                  jsons={this.state.jsonArray}
+                  deleteJson={this.deleteJson}
+                  swapJson={this.swapJson}
+                />
+              }
+            </DragDropContext>
           </div>
         </div>
       </div>
