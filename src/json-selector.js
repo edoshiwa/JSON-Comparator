@@ -126,7 +126,29 @@ class JsonSelector extends React.Component {
       reader.readAsText(e.target.files[index]);
     }
   };
+  onDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
+    if (!destination) {
+      return;
+    }
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+    let arr = this.state.jsonArray;
+    let header = this.state.jsonArrayHeader;
 
+    let tmp = arr[source.index];
+    arr.splice(source.index, 1);
+    arr.splice(destination.index, 0, tmp);
+
+    let tmp2 = header[source.index];
+    header.splice(source.index, 1);
+    header.splice(destination.index, 0, tmp2);
+    this.setState({ jsonArray: arr, jsonArrayHeader: header });
+  };
   render() {
     return (
       <div>
@@ -170,7 +192,7 @@ class JsonSelector extends React.Component {
           </div>
           <Divider />
           <div id="second">
-            <DragDropContext>
+            <DragDropContext onDragEnd={this.onDragEnd}>
               {
                 <Table
                   key={uniqid()}

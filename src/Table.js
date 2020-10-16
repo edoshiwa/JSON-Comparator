@@ -6,14 +6,13 @@ import { Droppable } from "react-beautiful-dnd";
 import DraggableTable from "./Draggable-Table.jsx";
 
 const TableList = styled.div`
-  padding: 8px;
   background-color: ${(props) => (props.isDraggingOver ? "green" : "white")};
   display: flex;
+  border-collapse: collapse;
 `;
 const Container = styled.div`
-    margin 8px;
-    border: 1px solid lightgrey;
-    border-radius: 2px`;
+  margin: 1px;
+`;
 //DONE render platform info
 //DONE del function
 
@@ -36,7 +35,13 @@ function TableRow(props) {
 function TableData(props) {
   return (
     <td className={props.className} rowSpan={props.rowSpan}>
-      {props.value}
+      <div
+        className={
+          props.rowSpan === 2 ? "div-data-wrapper-double" : "div-data-wrapper"
+        }
+      >
+        {props.value}
+      </div>
     </td>
   );
 }
@@ -314,11 +319,36 @@ const Table = (props) => {
         </table>
       </div>
     );*/
+    /*<table>
+          <thead>
+            <tr>
+              <th>Bench description</th>
+            </tr>
+          </thead>
+          <tbody>{renderBenchMap(map, [])}</tbody>
+        </table>*/
     return (
       <Container>
         <Droppable droppableId={uniqid()} direction="horizontal">
           {(provided, snapshot) => (
             <TableList ref={provided.innerRef} {...provided.droppableProps}>
+              <table className="table-information">
+                <thead>
+                  <tr>
+                    <th>
+                      <div className="div-table-header">
+                        <div className="div-text-table-header">
+                          Bench description
+                        </div>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {renderBenchInfo([])}
+                  {renderBenchMap(map, [])}
+                </tbody>
+              </table>
               {jsons.map((json, index) => (
                 <DraggableTable
                   key={thead[index]}
@@ -326,6 +356,9 @@ const Table = (props) => {
                   json={json}
                   index={index}
                   map={map}
+                  theadLength={thead.length}
+                  deleteColumn={deleteColumn}
+                  swapColumn={swapColumn}
                 />
               ))}
               {provided.placeholder}

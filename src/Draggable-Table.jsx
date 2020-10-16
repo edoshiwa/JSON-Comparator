@@ -1,21 +1,72 @@
 import React from "react";
 import styled from "styled-components";
+import { DeleteOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { Draggable } from "react-beautiful-dnd";
 import { format_time, format_space } from "./util.js";
+import "antd/dist/antd.css";
+import "./index.css";
+import { Tooltip } from "antd";
 var uniqid = require("uniqid");
 const Table = styled.table`
-  border: 1px solid lightgrey;
-  border-radius: 2px;
-  padding: 8px;
-  background-color: ${(props) => (props.isDragging ? "blue" : "white")};
-`;
-const Container = styled.div`
-  border: 1px solid lightgrey;
-  border-radius: 2px;
-  padding: 8px;
-  background-color: ${(props) => (props.isDragging ? "blue" : "white")};
+  border: ${(props) =>
+    props.isDragging ? "1px solid rgb(233,106,40)" : "1px solid black"};
+  background-color: ${(props) => (props.isDragging ? "cyan" : "white")};
+  margin: -1px 0 0 -1px;
 `;
 
+function TableHead(props) {
+  return <th scope="col">{props.value}</th>;
+}
+function renderHeaderWithDel(
+  value,
+  index,
+  popFunction,
+  swapFunction,
+  tabLenght
+) {
+  let debut =
+    index === 0 ? null : (
+      <button
+        className="swapLeft"
+        onClick={() => swapFunction(index - 1, index)}
+      >
+        {<LeftOutlined />}
+      </button>
+    );
+  let fin =
+    index === tabLenght - 1 ? null : (
+      <button
+        className="swapRight"
+        onClick={() => swapFunction(index, index + 1)}
+      >
+        {<RightOutlined />}
+      </button>
+    );
+  let val = (
+    <div className="div-table-header">
+      {debut}
+      {
+        <div className={"div-text-table-header"}>
+          {
+            <Tooltip title={value} color={"#009d8a"}>
+              <span>{value}</span>
+            </Tooltip>
+          }
+        </div>
+      }
+      <button
+        className="del"
+        onClick={() => popFunction(index)}
+        shape="circle"
+        ghost="true"
+      >
+        {<DeleteOutlined />}
+      </button>
+      {fin}
+    </div>
+  );
+  return <TableHead key={"h" + index.toString()} value={val} />;
+}
 function TableRow(props) {
   return <tr className={props.className}>{props.value}</tr>;
 }
@@ -23,7 +74,7 @@ function TableRow(props) {
 function TableData(props) {
   return (
     <td className={props.className} rowSpan={props.rowSpan}>
-      {props.value}
+      <div className="div-data-wrapper">{props.value}</div>
     </td>
   );
 }
@@ -97,7 +148,15 @@ export default class DraggableTable extends React.Component {
             isDragging={snapshot.isDragging}
           >
             <thead>
-              <th {...provided.dragHandleProps}>{this.props.name}</th>
+              <tr {...provided.dragHandleProps}>
+                {renderHeaderWithDel(
+                  this.props.name,
+                  this.props.index,
+                  this.props.deleteColumn,
+                  this.props.swapColumn,
+                  this.props.theadLength
+                )}
+              </tr>
             </thead>
             <tbody>
               <TableRow
@@ -150,9 +209,6 @@ export default class DraggableTable extends React.Component {
                   ></TableData>,
                 ]}
               />
-              <tr>
-                <td>{this.props.json.time}</td>
-              </tr>
               {renderBenchMap(this.props.map, [this.props.json.bench])}
             </tbody>
           </Table>

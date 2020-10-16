@@ -19,13 +19,15 @@
   background-color: rgba(255, 255, 255, 0.541);
   color: rgb(41, 62, 81);
   font-weight: 800;
-  border: 1px solid black;
+  border-bottom: 1px solid black;
+  border-top: 1px solid black;
 }
 .informationData {
   text-align: center;
   white-space: pre-wrap;
   overflow-wrap: break-word;
-  border: 1px solid black;
+  border-bottom: 1px solid black;
+  border-top: 1px solid black;
 }
 .del,
 .swapLeft,
@@ -55,18 +57,34 @@ th {
 }
 td {
   text-align: center;
-  border-right: 1px solid black;
   white-space: nowrap;
 }
 th {
   text-align: center;
-  border: 1px solid black;
   background: radial-gradient(#007d82, #009d63);
   color: white;
   font-weight: 800;
   white-space: pre-line;
 }
-
+.div-table-header {
+  height: 30px;
+  overflow-y: hidden;
+  display: flex;
+}
+.div-text-table-header {
+  height: 30px;
+  overflow-y: hidden;
+  flex: 1;
+}
+.div-data-wrapper {
+  height: 24px;
+  overflow: hidden;
+}
+.div-data-wrapper-double {
+  height: 58px;
+  overflow: hidden;
+  white-space: normal;
+}
 .bottow-row {
   border-bottom: 1px solid black;
 }
@@ -116,4 +134,9 @@ body {
   border: 2px solid rgb(41, 62, 81);
   border-radius: 12px;
   padding: 10px;
+}
+
+.table-information {
+  margin: -1px 0 0 -1px;
+  width: 30%;
 }
