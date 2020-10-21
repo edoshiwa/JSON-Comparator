@@ -1,4 +1,4 @@
-import { Menu, Dropdown, Divider } from "antd";
+import { Menu, Dropdown, Divider, Badge } from "antd";
 import { DownOutlined, UploadOutlined } from "@ant-design/icons";
 import { DragDropContext } from "react-beautiful-dnd";
 import React from "react";
@@ -20,6 +20,7 @@ const apiUrl = "comparator/api.php";
 const urlParameters = "?name=";
 
 class JsonSelector extends React.Component {
+  websocket_server = new WebSocket("ws://localhost:8080/");
   constructor(props) {
     super();
 
@@ -38,8 +39,9 @@ class JsonSelector extends React.Component {
   }
   fetchJsonList = () => {
     if (
-      this.state.lastJsonFetch == null ||
-      Date.now() - this.state.lastJsonFetch > 5000
+      this.state.lastJsonFetch == null
+      //||
+      //Date.now() - this.state.lastJsonFetch > 5000
     ) {
       fetch(localUrl + apiUrl)
         .then((response) => response.json())
@@ -55,6 +57,19 @@ class JsonSelector extends React.Component {
   };
   componentDidMount() {
     this.fetchJsonList();
+    this.websocket_server.onopen = () => {
+      this.websocket_server.send(
+        JSON.stringify({
+          type: "socket",
+          user_id: uniqid(),
+        })
+      );
+    };
+    this.websocket_server.onmessage = (evt) => {
+      const message = JSON.parse(evt.data);
+      console.log(message);
+      this.setState({ lastJsonFetch: null });
+    };
   }
 
   updateMenu(arr) {
@@ -167,6 +182,7 @@ class JsonSelector extends React.Component {
                 Select JSON from server <DownOutlined />
               </a>
             </Dropdown>
+
             <label htmlFor="dirpicker" className="input-btn">
               Select local JSON directory <UploadOutlined />
             </label>
