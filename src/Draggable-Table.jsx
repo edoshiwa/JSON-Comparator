@@ -13,10 +13,21 @@ const Table = styled.table`
   background-color: ${(props) => (props.isDragging ? "cyan" : "white")};
   margin: -1px 0 0 -1px;
 `;
-
+/**
+ * Return a JSX th
+ * @param {*} props : props.value need to be define.
+ */
 function TableHead(props) {
   return <th scope="col">{props.value}</th>;
 }
+/**
+ * Render a JSX th
+ * @param {*} value : title of the th
+ * @param {*} index : position of the th in the table list
+ * @param {*} popFunction : function to pop the th
+ * @param {*} swapFunction  : function to swap the th
+ * @param {*} tabLenght : table list lenght
+ */
 function renderHeaderWithDel(
   value,
   index,
@@ -67,10 +78,19 @@ function renderHeaderWithDel(
   );
   return <TableHead key={"h" + index.toString()} value={val} />;
 }
+/**
+ * Render a JSX tr
+ * @param {*} props : one or more JSX td or th
+ */
 function TableRow(props) {
   return <tr className={props.className}>{props.value}</tr>;
 }
-//Generate a td with appropriate attributes
+/**
+ * @returns JSX td element, its data is wrapped within a div to breakline
+ * @param {*} props.rowSpan RowSpan of the cell
+ * @param {*} props.value Value to render
+ * @param {*} props.className  CSS style
+ */
 function TableData(props) {
   return (
     <td className={props.className} rowSpan={props.rowSpan}>
@@ -78,6 +98,11 @@ function TableData(props) {
     </td>
   );
 }
+/**
+ * @return JSX render of multiple row of table Data
+ * @param {*} map map of all bench
+ * @param {*} benchs list of the bench
+ */
 function renderBenchMap(map, benchs) {
   let data = [];
   map.forEach((value, key) => {
@@ -103,6 +128,11 @@ function renderBenchMap(map, benchs) {
   });
   return data;
 }
+/**
+ * @returns JSX td, if value is not defined then it will render a dash
+ * @param {*} bench list of the bench
+ * @param {*} id id of the bench function that has been tested
+ */
 function renderDataKey(bench, id) {
   let timeValue = null;
   bench.map((elem) => {
@@ -120,6 +150,9 @@ function renderDataKey(bench, id) {
     );
   }
 }
+/**
+ * Redundant function of renderDataKey but for space value
+ */
 function renderDataKeySpace(bench, id) {
   let spaceValue = null;
   bench.map((elem) => {
