@@ -1,11 +1,13 @@
 import { Menu, Dropdown, Divider } from "antd";
 import { DownOutlined, UploadOutlined } from "@ant-design/icons";
 import { DragDropContext } from "react-beautiful-dnd";
+import schema from "./json-schema.json";
+import Ajv from "ajv";
 import React from "react";
 import Table from "./Table.js";
 import "./App.css";
 
-var uniqid = require("uniqid");
+let uniqid = require("uniqid");
 const localUrl = "http://localhost/benchmark/";
 const apiUrl = "comparator/api.php";
 const urlParameters = "?name=";
@@ -87,7 +89,7 @@ class App extends React.Component {
         evt.reason
       );
       setTimeout(function () {
-        this.websocket_server.connect();
+        this.websocket_server = new WebSocket("ws://localhost:8080/");
       }, 1000);
     };
   }
@@ -226,8 +228,16 @@ class App extends React.Component {
       // the callback function will be use when readAsText is called
       reader.onloadend = (e) => {
         const jsonTest = JSON.parse(e.target.result);
-        files.push(jsonTest);
-        this.setState({ jsonArray: files, jsonArrayHeader: filesName });
+
+        var ajv = new Ajv();
+        var validate = ajv.compile(schema);
+        let valid = validate(jsonTest);
+
+        if (!valid) console.log(validate.errors);
+        else {
+          files.push(jsonTest);
+          this.setState({ jsonArray: files, jsonArrayHeader: filesName });
+        }
       };
       reader.readAsText(e.target.files[index]);
     }

@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "http://localhost/benchmark/schemas/benchmark.json",
+  "title": "Benchmarks",
+  "description": "List of benchmarks",
+  "type": "object",
+  "properties": {
+    "time": {
+      "description": "Creation date of JSON",
+      "type": "string",
+      "format": "date-time"
+    },
+    "platform": {
+      "description": "Benchmark platform information",
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "maxProperties": 4,
+      "required": ["type", "OS", "uname", "version"]
+    },
+    "unit": {
+      "description": "Units of the results",
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "required": ["space", "time"]
+    },
+    "bench": {
+      "type": "array",
+      "items": {
+        "description": "Bencharmarks' result",
+        "title": "Result",
+        "type": "object",
+        "properties": {
+          "description": {
+            "description": "Description of the benchmark",
+            "type": "string"
+          },
+          "time": {
+            "description": "Time taken to do the bench",
+            "type": "integer",
+            "minimum": 0
+          },
+          "space": {
+            "description": "Space used by the bench",
+            "type": "integer",
+            "minimum": 0
+          },
+          "id": {
+            "description": "ID of the benchmark",
+            "type": "string"
+          }
+        },
+        "required": ["description", "time", "space", "id"]
+      }
+    }
+  },
+  "required": ["time", "platform", "unit", "bench"]
+}
