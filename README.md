@@ -1,4 +1,4 @@
-#Purpose 
+# Purpose 
 
 This project aim to compare different benchmark from different language.
 A JSON file can contains multiple benchmark of different fonction. In every case it must respect the following [schema](https://github.com/edoshiwa/JSON-Comparator/blob/master/src/json-schema.json).
@@ -9,7 +9,7 @@ There is two non-exclusive way to use this projet:
 * Using JSON from your local disk
 A benchmark result is a JSON file, check 
 
-##Configuration
+## Configuration
 
 You MAY want to change the following const url in (App.js)[https://github.com/edoshiwa/JSON-Comparator/blob/master/src/App.js] if you use a distant server (with or without WSS):
 
@@ -23,7 +23,7 @@ You MAY want to change the following const url in (App.js)[https://github.com/ed
 
 To have a better understanding of how it work here is a (diagram)[https://github.com/edoshiwa/JSON-Comparator/blob/master/doc/img/WSS.png].
 
-##Use 
+## Use 
 
 In a dev environnement you could launch
 
