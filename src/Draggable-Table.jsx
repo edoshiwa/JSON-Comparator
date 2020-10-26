@@ -157,7 +157,7 @@ function renderDataKeySpace(bench, id) {
   let spaceValue = null;
   bench.map((elem) => {
     if (elem.id === id) {
-      spaceValue = elem.space;
+      spaceValue = elem.size;
     }
   });
   if (spaceValue == null) {

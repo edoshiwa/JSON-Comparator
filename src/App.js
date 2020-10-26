@@ -8,13 +8,12 @@ import Table from "./Table.js";
 import "./App.css";
 
 let uniqid = require("uniqid");
-const localUrl = "http://localhost/benchmark/";
+const localUrl = "http://localhost/easyvista_training/";
 const apiUrl = "comparator/api.php";
 const urlParameters = "?name=";
 
 class App extends React.Component {
   // Init WebSocket connection
-  websocket_server = new WebSocket("ws://localhost:8080/");
 
   /**
    * Bind the following functions :
@@ -61,6 +60,7 @@ class App extends React.Component {
    * @function this.websocket_server.onclose : when the connection is closed
    */
   componentDidMount() {
+    this.websocket_server = new WebSocket("ws://localhost:8080/");
     this.fetchJsonList();
     this.websocket_server.onopen = () => {
       this.websocket_server.send(
