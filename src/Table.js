@@ -1,16 +1,21 @@
 import React from "react";
 import { format_time, format_space } from "./util.js";
-import { DeleteOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import styled from "styled-components";
+import { Droppable } from "react-beautiful-dnd";
+import DraggableTable from "./Draggable-Table.jsx";
 
-//DONE render platform info
-//DONE del function
+//Styled div
+const TableList = styled.div`
+  background-color: ${(props) => (props.isDraggingOver ? "green" : "white")};
+  display: flex;
+  border-collapse: collapse;
+`;
+const Container = styled.div`
+  margin: 1px;
+`;
 
 //function to create unique key for react
 var uniqid = require("uniqid");
-//Generate a th and give the col scope
-function TableHead(props) {
-  return <th scope="col">{props.value}</th>;
-}
 
 //Generate a row from multiple th or td
 function TableRow(props) {
@@ -20,60 +25,17 @@ function TableRow(props) {
 function TableData(props) {
   return (
     <td className={props.className} rowSpan={props.rowSpan}>
-      {props.value}
+      <div
+        className={
+          props.rowSpan === 2 ? "div-data-wrapper-double" : "div-data-wrapper"
+        }
+      >
+        {props.value}
+      </div>
     </td>
   );
 }
-//render the generated th
-function renderHead(value, index, popFunction) {
-  return <TableHead key={"h" + index.toString()} value={value} />;
-}
-function renderHeaderWithDel(
-  value,
-  index,
-  popFunction,
-  swapFunction,
-  tabLenght
-) {
-  let debut =
-    index === 0 ? null : (
-      <button
-        className="swapLeft"
-        onClick={() => swapFunction(index - 1, index)}
-      >
-        {<LeftOutlined />}
-      </button>
-    );
-  let fin =
-    index === tabLenght - 1 ? null : (
-      <button
-        className="swapRight"
-        onClick={() => swapFunction(index, index + 1)}
-      >
-        {<RightOutlined />}
-      </button>
-    );
-  let val = (
-    <div>
-      {debut}
-      {value}
-      <button
-        className="del"
-        onClick={() => popFunction(index)}
-        shape="circle"
-        ghost="true"
-      >
-        {<DeleteOutlined />}
-      </button>
-      {fin}
-    </div>
-  );
-  return <TableHead key={"h" + index.toString()} value={val} />;
-}
-//render the generated td
-function renderData(value) {
-  return <TableData key={uniqid()} value={value} />;
-}
+
 //render td if time data exist with associate id
 //if it doesn't exist it render a empty td
 function renderDataKey(bench, id) {
@@ -111,13 +73,11 @@ function renderDataKeySpace(bench, id) {
     );
   }
 }
-function renderRow(row) {
-  return (
-    <TableRow key={uniqid()} value={row.map((value) => renderData(value))} />
-  );
-}
-//Generate a key map from benchmark to know the id and the description of all benchmark
-//that have been fetch
+
+/**
+ * Generate a key map from benchmark to know the id and the description of all benchmark
+ * that have been fetch
+ */
 function keyMap(map, benchmarks) {
   for (var bench in benchmarks) {
     if (!map.has(benchmarks[bench].id))
@@ -157,6 +117,7 @@ function renderBenchMap(map, benchs) {
   });
   return data;
 }
+//render the bench platform description
 function renderBenchInfo(benchs) {
   let data = [];
   data.push(
@@ -187,7 +148,7 @@ function renderBenchInfo(benchs) {
           <TableData
             key={uniqid()}
             className={"informationData"}
-            value={(bench.time)}
+            value={bench.time}
           />
         )),
       ]}
@@ -240,63 +201,70 @@ function renderBenchInfo(benchs) {
   );
   return data;
 }
-/*
-1: Création de la map : function_id => description_bench
-  -> On parcours chaque JSON
-    -> On regarde chaque bench
-      -> On regarde si la map a déjà la clé si oui on passe, sinon on ajoute
-2: Parcours de la map, pour chaque function_id :
-  -> 2.1 : Affichage de description_bench avec rowspan = 2
-  -> 2.2 : Parcours de chaque JSON
-    -> 2.2.1 : Parcours de chaque bench, si clé du bench = function_id existe on affiche bench.time, sinon long tiret
-    -> 2.2.2 : Parcours de chaque bench, si clé du bench = function_id existe on affiche bench.space, sinon long tiret
-n : nombre de bench
-m : longeur max de bench
-Complexité max O(nm+2nm²), compléxité quadratique
-*/
+//render the bench information description
+const renderTableInformation = (map) => {
+  return (
+    <table className="table-information">
+      <thead>
+        <tr>
+          <th>
+            <div className="div-table-header">
+              <div className="div-text-table-header">Bench description</div>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {renderBenchInfo([])}
+        {renderBenchMap(map, [])}
+      </tbody>
+    </table>
+  );
+};
 
 const Table = (props) => {
-  const { thead } = props;
-  const jsons = props.jsons;
+  //Destructuring props
+  const { thead, jsons } = props;
+
   const benchs = [];
   jsons.forEach((e) => benchs.push(e.bench));
+
   let map = new Map();
   benchs.forEach((el) => keyMap(map, el));
+
   const deleteColumn = (key) => {
-    console.log("deleting colum :" + key)
+    console.log("deleting colum :" + key);
     props.deleteJson(key);
   };
   const swapColumn = (a, b) => {
     props.swapJson(a, b);
   };
-  renderBenchInfo(jsons);
   if (jsons.length > 0) {
     return (
-      <div>
-        <table className="">
-          <thead className="">
-            <tr>
-              <th>Bench description</th>
-              {thead.map((element, index) =>
-                renderHeaderWithDel(
-                  element,
-                  index,
-                  deleteColumn,
-                  swapColumn,
-                  thead.length
-                )
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            {renderBenchInfo(jsons)}
-            {renderBenchMap(map, benchs)}
-          </tbody>
-        </table>
-      </div>
+      <Container>
+        <Droppable droppableId={uniqid()} direction="horizontal">
+          {(provided, snapshot) => (
+            <TableList ref={provided.innerRef} {...provided.droppableProps}>
+              {renderTableInformation(map)}
+              {jsons.map((json, index) => (
+                <DraggableTable
+                  key={thead[index]}
+                  name={thead[index]}
+                  json={json}
+                  index={index}
+                  map={map}
+                  theadLength={thead.length}
+                  deleteColumn={deleteColumn}
+                  swapColumn={swapColumn}
+                />
+              ))}
+              {provided.placeholder}
+            </TableList>
+          )}
+        </Droppable>
+      </Container>
     );
-  }
-  else return null;
+  } else return null;
 };
 
 export default Table;

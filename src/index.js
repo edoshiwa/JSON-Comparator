@@ -1,14 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import JsonSelector from "./json-selector.js";
-
+import App from "./App.js";
 
 ReactDOM.render(
   <React.StrictMode>
-    <JsonSelector />
+    <App />
   </React.StrictMode>,
   document.getElementById("root")
 );
-
-
