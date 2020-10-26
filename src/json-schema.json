@@ -6,7 +6,7 @@
   "type": "object",
   "properties": {
     "time": {
-      "description": "Creation date of JSON",
+      "description": "Benchmark date",
       "type": "string",
       "format": "date-time"
     },
@@ -21,7 +21,7 @@
       "description": "Units of the results",
       "type": "object",
       "additionalProperties": { "type": "string" },
-      "required": ["space", "time"]
+      "required": ["size", "time"]
     },
     "bench": {
       "type": "array",
@@ -39,7 +39,7 @@
             "type": "integer",
             "minimum": 0
           },
-          "space": {
+          "size": {
             "description": "Space used by the bench",
             "type": "integer",
             "minimum": 0
