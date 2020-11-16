@@ -1,4 +1,4 @@
-import { Menu, Dropdown, Divider } from "antd";
+import { Menu, Dropdown, Divider, Switch, Slider, Row, Col } from "antd";
 import { DownOutlined, UploadOutlined } from "@ant-design/icons";
 import { DragDropContext } from "react-beautiful-dnd";
 import schema from "./json-schema.json";
@@ -6,6 +6,7 @@ import Ajv from "ajv";
 import React from "react";
 import Table from "./Table.js";
 import "./App.css";
+import { time } from "uniqid";
 
 let uniqid = require("uniqid");
 const webSocketUrl = "ws://localhost:8080/";
@@ -34,6 +35,9 @@ class App extends React.Component {
    */
   constructor(props) {
     super();
+    this.handleSliderChange = this.handleSliderChange.bind(this);
+    this.handleDisabledChange = this.handleDisabledChange.bind(this);
+    this.updateMap = this.updateMap.bind(this);
     this.onClick = this.onClick.bind(this);
     this.deleteJson = this.deleteJson.bind(this);
     this.swapJson = this.swapJson.bind(this);
@@ -42,10 +46,13 @@ class App extends React.Component {
     this.state = {
       menu: [],
       jsonFileName: [],
+      benchIdMap: [],
       menuIsDirty: true,
       lastTimeFetch: null,
       jsonArray: [],
       jsonArrayHeader: [],
+      showGradient: false,
+      comparisonMargin: 99,
     };
   }
   /**
@@ -111,7 +118,12 @@ class App extends React.Component {
           let arrThead = this.state.jsonArrayHeader.concat(
             this.state.jsonFileName[key]
           );
-          this.setState({ jsonArray: arr, jsonArrayHeader: arrThead });
+          this.setState({
+            jsonArray: arr,
+            jsonArrayHeader: arrThead,
+            benchIdMap: this.updateMap(arr),
+          });
+          //this.updateMap();
         },
         (error) => {
           this.setState({ menuIsDirty: true });
@@ -135,7 +147,12 @@ class App extends React.Component {
     arr.splice(key, 1);
     let header = this.state.jsonArrayHeader;
     header.splice(key, 1);
-    this.setState({ jsonArray: arr, jsonArrayHeader: header });
+    this.setState({
+      jsonArray: arr,
+      jsonArrayHeader: header,
+      benchIdMap: this.updateMap(arr),
+    });
+    //this.updateMap();
   };
   /**
    * It will swap in state two JSON and their corresponding title.
@@ -233,11 +250,16 @@ class App extends React.Component {
         var ajv = new Ajv();
         var validate = ajv.compile(schema);
         let valid = validate(jsonTest);
-
+        console.log("est valide : " + valid);
         if (!valid) console.log(validate.errors);
         else {
           files.push(jsonTest);
-          this.setState({ jsonArray: files, jsonArrayHeader: filesName });
+          this.setState({
+            jsonArray: files,
+            jsonArrayHeader: filesName,
+            benchIdMap: this.updateMap(files),
+          });
+          //this.updateMap();
         }
       };
       reader.readAsText(e.target.files[index]);
@@ -277,6 +299,39 @@ class App extends React.Component {
     header.splice(destination.index, 0, tmp2);
     //we update the state and the component refresh
     this.setState({ jsonArray: arr, jsonArrayHeader: header });
+  };
+  /**
+   * Update the map state. The map contains all the id of charged benchmark
+   * @param {*} arr
+   */
+  updateMap = (arr) => {
+    var mapTmp = new Map();
+    arr.forEach((el) => {
+      for (var benchmark in el.bench) {
+        if (!mapTmp.has(el.bench[benchmark].id)) {
+          //console.log("id" + el.bench[benchmark].id);
+          //console.log("des" + el.bench[benchmark].description);
+          mapTmp.set(el.bench[benchmark].id, el.bench[benchmark].description);
+        }
+      }
+    });
+    console.log("update map : ");
+    //mapTmp.forEach((element) => console.log(element));
+    return mapTmp;
+  };
+  /**
+   * Handle change in the trigger button
+   * @param {*} disabled state of the button
+   */
+  handleDisabledChange = (disabled) => {
+    this.setState({ showGradient: disabled });
+  };
+  /**
+   * Handler change in the slider
+   * @param {*} value of the slider
+   */
+  handleSliderChange = (value) => {
+    this.setState({ comparisonMargin: value });
   };
   /**
    * The render function can be divided in 3 parts
@@ -327,15 +382,45 @@ class App extends React.Component {
             />
           </div>
           <Divider />
+          <div className="options">
+            <Row>
+              <Col>Comparison type :</Col>
+              <Col>
+                <Switch
+                  checked={this.state.showGradient}
+                  onChange={this.handleDisabledChange}
+                  checkedChildren="Wider Top and Bottom"
+                  unCheckedChildren="Strict Top and Bottom"
+                />
+              </Col>
+              <Col hidden={!this.state.showGradient}>Comparison margin :</Col>
+              <Col span="4" hidden={!this.state.showGradient}>
+                <Slider
+                  min={51}
+                  max={100}
+                  defaultValue={this.state.comparisonMargin}
+                  disabled={!this.state.showGradient}
+                  onChange={this.handleSliderChange}
+                />
+              </Col>
+              <Col hidden={!this.state.showGradient}>
+                {this.state.comparisonMargin} %
+              </Col>
+            </Row>
+          </div>
+
           <div id="second">
             <DragDropContext onDragEnd={this.onDragEnd}>
               {
                 <Table
+                  comparisonMargin={this.state.comparisonMargin}
+                  showGradient={this.state.showGradient}
                   key={uniqid()}
                   thead={this.state.jsonArrayHeader}
                   jsons={this.state.jsonArray}
                   deleteJson={this.deleteJson}
                   swapJson={this.swapJson}
+                  benchIdMap={this.state.benchIdMap}
                 />
               }
             </DragDropContext>

@@ -221,17 +221,54 @@ const renderTableInformation = (map) => {
     </table>
   );
 };
+/**
+ * Order, row by row, the fastest to slowest benchmark
+ * @param {*} map available id
+ * @param {*} jsons all charged jsons
+ */
+const ranking = (map, jsons) => {
+  let ranksTime = [];
+  let ranksSize = [];
+  map.forEach((elementMap, key) => {
+    let unsortedResult = [];
+
+    jsons.map((json, index) => {
+      json.bench.map((benchmark) => {
+        if (benchmark.id === key) {
+          benchmark["index"] = index;
+          unsortedResult[index] = benchmark;
+        }
+      });
+    });
+    console.log();
+    //unsortedResult.map((e) => console.log(e));
+    ranksSize[key] = unsortedResult
+      .sort(function (a, b) {
+        return a.size - b.size;
+      })
+      .slice();
+    ranksTime[key] = unsortedResult.sort(function (a, b) {
+      return a.time - b.time;
+    });
+  });
+
+  return [ranksTime, ranksSize];
+};
 
 const Table = (props) => {
   //Destructuring props
-  const { thead, jsons } = props;
-
+  const { thead, jsons, benchIdMap, showGradient, comparisonMargin } = props;
   const benchs = [];
   jsons.forEach((e) => benchs.push(e.bench));
-
+  //console.log(benchIdMap.length);
   let map = new Map();
-  benchs.forEach((el) => keyMap(map, el));
-
+  if (benchIdMap != null) {
+    //benchIdMap.forEach((element) => console.log(element));
+    benchIdMap.forEach((element, key) => map.set(key, element));
+  }
+  const [ranksTime, ranksSize] = ranking(benchIdMap, jsons);
+  //benchs.forEach((el) => keyMap(map, el));
+  //map.forEach((element) => console.log(element));
   const deleteColumn = (key) => {
     console.log("deleting colum :" + key);
     props.deleteJson(key);
@@ -248,11 +285,15 @@ const Table = (props) => {
               {renderTableInformation(map)}
               {jsons.map((json, index) => (
                 <DraggableTable
+                  comparisonMargin={comparisonMargin}
+                  showGradient={showGradient}
                   key={thead[index]}
                   name={thead[index]}
                   json={json}
                   index={index}
                   map={map}
+                  ranksTime={ranksTime}
+                  ranksSize={ranksSize}
                   theadLength={thead.length}
                   deleteColumn={deleteColumn}
                   swapColumn={swapColumn}
