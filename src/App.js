@@ -1,3 +1,4 @@
+/* eslint-disable no-invalid-this */
 import { Menu, Dropdown, Divider, Switch, Slider, Row, Col } from "antd";
 import { DownOutlined, UploadOutlined } from "@ant-design/icons";
 import { DragDropContext } from "react-beautiful-dnd";
@@ -6,14 +7,15 @@ import Ajv from "ajv";
 import React from "react";
 import Table from "./Table.js";
 import "./App.css";
-import { time } from "uniqid";
 
-let uniqid = require("uniqid");
+const uniqid = require("uniqid");
 const webSocketUrl = "ws://localhost:8080/";
 const localUrl = "http://localhost/easyvista_training/";
 const apiUrl = "comparator/api.php";
 const urlParameters = "?name=";
-
+/**
+ * App class
+ */
 class App extends React.Component {
   // Init WebSocket connection
 
@@ -25,7 +27,9 @@ class App extends React.Component {
    * @function this.fetchJsonList : Called when menu isDirty
    * @function this.handleUploadedFiles : Called when a file is upload into the webpage
    *
-   * Init the following states :
+   * Init the following states */
+  /**
+   * @param {*} props
    * @property {array} menu : Array of MenuItem
    * @property {array} jsonFileName : Array of String reprensenting JSON filename without extension
    * @property {boolean} menuIsDirty : Represent if the menu need to be updated
@@ -59,45 +63,43 @@ class App extends React.Component {
    * When component is mount
    * And fetch JSON list to update menu.
    * It call:
-   * @function this.fetchJsonList : And fetch JSON list to update menu.
-   *
-   * It modify the following callback in WebSocket API.
-   * @function this.websocket_server.onopen : when the connection is made with the WSS
-   * @function this.websocket_server.onmessage : when the WSS connection receive message from other client
-   * @function this.websocket_server.onerror : when the connection encounter an error
-   * @function this.websocket_server.onclose : when the connection is closed
+   * this.fetchJsonList : And fetch JSON list to update menu.
+   * this.websocketServer.onopen : when the connection is made with the WSS
+   * this.websocketServer.onmessage : when the WSS connection receive message from other client
+   * this.websocketServer.onerror : when the connection encounter an error
+   * this.websocketServer.onclose : when the connection is closed
    */
   componentDidMount() {
-    this.websocket_server = new WebSocket(webSocketUrl);
+    this.websocketServer = new WebSocket(webSocketUrl);
     this.fetchJsonList();
-    this.websocket_server.onopen = () => {
-      this.websocket_server.send(
+    this.websocketServer.onopen = () => {
+      this.websocketServer.send(
         JSON.stringify({
           type: "listener",
           user_id: uniqid(),
         })
       );
     };
-    this.websocket_server.onmessage = (evt) => {
+    this.websocketServer.onmessage = (evt) => {
       const message = JSON.parse(evt.data);
       console.log(message);
       this.setState({ menuIsDirty: true });
     };
-    this.websocket_server.onerror = (evt) => {
+    this.websocketServer.onerror = (evt) => {
       console.error(
         "Socket encountered error: ",
         evt.message,
         "Closing socket"
       );
-      this.websocket_server.close();
+      this.websocketServer.close();
     };
-    this.websocket_server.onclose = (evt) => {
+    this.websocketServer.onclose = (evt) => {
       console.log(
         "Socket is closed. Reconnect will be attempted in 1 second.",
         evt.reason
       );
       setTimeout(function () {
-        this.websocket_server = new WebSocket(webSocketUrl);
+        this.websocketServer = new WebSocket(webSocketUrl);
       }, 1000);
     };
   }
@@ -114,8 +116,8 @@ class App extends React.Component {
       .then((response) => response.json())
       .then(
         (res) => {
-          let arr = this.state.jsonArray.concat(res);
-          let arrThead = this.state.jsonArrayHeader.concat(
+          const arr = this.state.jsonArray.concat(res);
+          const arrThead = this.state.jsonArrayHeader.concat(
             this.state.jsonFileName[key]
           );
           this.setState({
@@ -123,7 +125,6 @@ class App extends React.Component {
             jsonArrayHeader: arrThead,
             benchIdMap: this.updateMap(arr),
           });
-          //this.updateMap();
         },
         (error) => {
           this.setState({ menuIsDirty: true });
@@ -143,16 +144,15 @@ class App extends React.Component {
    * @param {number} key : index of element in jsonArray or jsonArrayHeader
    */
   deleteJson = (key) => {
-    let arr = this.state.jsonArray;
+    const arr = this.state.jsonArray;
     arr.splice(key, 1);
-    let header = this.state.jsonArrayHeader;
+    const header = this.state.jsonArrayHeader;
     header.splice(key, 1);
     this.setState({
       jsonArray: arr,
       jsonArrayHeader: header,
       benchIdMap: this.updateMap(arr),
     });
-    //this.updateMap();
   };
   /**
    * It will swap in state two JSON and their corresponding title.
@@ -160,8 +160,8 @@ class App extends React.Component {
    * @param {number} secondIndex the index of the second JSON
    */
   swapJson = (firstIndex, secondIndex) => {
-    let arr = this.state.jsonArray;
-    let header = this.state.jsonArrayHeader;
+    const arr = this.state.jsonArray;
+    const header = this.state.jsonArrayHeader;
     let tmp = arr[firstIndex];
     arr[firstIndex] = arr[secondIndex];
     arr[secondIndex] = tmp;
@@ -181,7 +181,7 @@ class App extends React.Component {
     if (
       this.state.menuIsDirty === true ||
       this.state.lastTimeFetch == null ||
-      (this.websocket_server.readyState === WebSocket.CLOSED &&
+      (this.websocketServer.readyState === WebSocket.CLOSED &&
         Date.now() - this.state.lastTimeFetch > 5000)
     ) {
       console.log("Fetching...");
@@ -208,7 +208,8 @@ class App extends React.Component {
   };
   /**
    * Update Menu item with a list of JSON filenames
-   * @param {String Array} arr : JSON filenames
+   * @param {*} arr : JSON filenames
+   * @return {*} a new menu
    */
   updateMenu(arr) {
     return (
@@ -235,21 +236,21 @@ class App extends React.Component {
    */
   handleUploadedFiles = async (e) => {
     for (let index = 0; index < e.target.files.length; index++) {
-      let files = this.state.jsonArray;
-      let filesName = this.state.jsonArrayHeader;
-      //push file name into the array without the .json extension
+      const files = this.state.jsonArray;
+      const filesName = this.state.jsonArrayHeader;
+      // push file name into the array without the .json extension
       filesName.push(
         e.target.files[index].name.split(".").slice(0, -1).join(".")
       );
-      //Create a file reader
-      let reader = new FileReader();
+      // Create a file reader
+      const reader = new FileReader();
       // the callback function will be use when readAsText is called
       reader.onloadend = (e) => {
         const jsonTest = JSON.parse(e.target.result);
 
-        var ajv = new Ajv();
-        var validate = ajv.compile(schema);
-        let valid = validate(jsonTest);
+        const ajv = new Ajv();
+        const validate = ajv.compile(schema);
+        const valid = validate(jsonTest);
         console.log("est valide : " + valid);
         if (!valid) console.log(validate.errors);
         else {
@@ -259,7 +260,7 @@ class App extends React.Component {
             jsonArrayHeader: filesName,
             benchIdMap: this.updateMap(files),
           });
-          //this.updateMap();
+          // this.updateMap();
         }
       };
       reader.readAsText(e.target.files[index]);
@@ -267,56 +268,57 @@ class App extends React.Component {
   };
   /**
    * Callback function when a draggable has been dropped in a droppable area
-   * @param  result data about the DnD context
+   * @param {*} result data about the DnD context
    */
   onDragEnd = (result) => {
     const { destination, source } = result;
-    //if there is no destination, there is no change to do
+    // if there is no destination, there is no change to do
     if (!destination) {
       return;
     }
-    //if the destination is the source, there is no change to do
+    // if the destination is the source, there is no change to do
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
       return;
     }
-    //We want to shift the dragged element at the right destination
-    //We save the current state
-    let arr = this.state.jsonArray;
-    let header = this.state.jsonArrayHeader;
-    //We save the dragged element in a tmp value
-    let tmp = arr[source.index];
-    //We delete the dragged element from the saved current state
+    // We want to shift the dragged element at the right destination
+    // We save the current state
+    const arr = this.state.jsonArray;
+    const header = this.state.jsonArrayHeader;
+    // We save the dragged element in a tmp value
+    const tmp = arr[source.index];
+    // We delete the dragged element from the saved current state
     arr.splice(source.index, 1);
-    //We push the dragged element at the right destination in the saved current state
+    // We push the dragged element at the right destination in the saved current state
     arr.splice(destination.index, 0, tmp);
 
-    //same thing for the title
-    let tmp2 = header[source.index];
+    // same thing for the title
+    const tmp2 = header[source.index];
     header.splice(source.index, 1);
     header.splice(destination.index, 0, tmp2);
-    //we update the state and the component refresh
+    // we update the state and the component refresh
     this.setState({ jsonArray: arr, jsonArrayHeader: header });
   };
   /**
    * Update the map state. The map contains all the id of charged benchmark
    * @param {*} arr
+   * @return {*} a Map of unique id of benchmark in all jsons
    */
   updateMap = (arr) => {
-    var mapTmp = new Map();
+    const mapTmp = new Map();
     arr.forEach((el) => {
-      for (var benchmark in el.bench) {
+      for (const benchmark in el.bench) {
         if (!mapTmp.has(el.bench[benchmark].id)) {
-          //console.log("id" + el.bench[benchmark].id);
-          //console.log("des" + el.bench[benchmark].description);
+          // console.log("id" + el.bench[benchmark].id);
+          // console.log("des" + el.bench[benchmark].description);
           mapTmp.set(el.bench[benchmark].id, el.bench[benchmark].description);
         }
       }
     });
     console.log("update map : ");
-    //mapTmp.forEach((element) => console.log(element));
+    // mapTmp.forEach((element) => console.log(element));
     return mapTmp;
   };
   /**
@@ -333,11 +335,14 @@ class App extends React.Component {
   handleSliderChange = (value) => {
     this.setState({ comparisonMargin: value });
   };
-  /**
+  /*
    * The render function can be divided in 3 parts
    * 1. The title
    * 2. div first: contains all JSON input (from a server or from local disk)
    * 3. div second: contains TableList
+   */
+  /**
+   * @return {*} the App div containing  file selection menu /  options / draggable table
    */
   render() {
     return (

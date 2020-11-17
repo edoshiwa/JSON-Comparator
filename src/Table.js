@@ -1,10 +1,11 @@
 import React from "react";
-import { format_time, format_space } from "./util.js";
+import { formatTime, formatSize } from "./util.js";
 import styled from "styled-components";
 import { Droppable } from "react-beautiful-dnd";
 import DraggableTable from "./Draggable-Table.jsx";
+import PropTypes from "prop-types";
 
-//Styled div
+// Styled div
 const TableList = styled.div`
   background-color: ${(props) => (props.isDraggingOver ? "green" : "white")};
   display: flex;
@@ -14,14 +15,32 @@ const Container = styled.div`
   margin: 1px;
 `;
 
-//function to create unique key for react
-var uniqid = require("uniqid");
+// function to create unique key for react
+const uniqid = require("uniqid");
 
-//Generate a row from multiple th or td
+/**
+ * Generate a row from multiple th or td
+ * @param {*} props with className and value are necessery for the table row
+ * @property {*} className for CSS style
+ * @property {*} value a list of th or td
+ * @return {*} a table row
+ */
 function TableRow(props) {
   return <tr className={props.className}>{props.value}</tr>;
 }
-//Generate a td with appropriate attributes
+TableRow.propTypes = {
+  className: PropTypes.string,
+  value: PropTypes.any.isRequired,
+};
+
+/**
+ * Generate a td with appropriate attributes
+ * @param {*} props for the table data below
+ * @property {*} className for CSS styling
+ * @property {*} rowSpan When you need multiple row cell
+ * @property {*} value value of the cell
+ * @return {*} a td of 1 or 2 rowspan
+ */
 function TableData(props) {
   return (
     <td className={props.className} rowSpan={props.rowSpan}>
@@ -35,9 +54,19 @@ function TableData(props) {
     </td>
   );
 }
+TableData.propTypes = {
+  className: PropTypes.string,
+  rowSpan: PropTypes.number,
+  value: PropTypes.any.isRequired,
+};
 
-//render td if time data exist with associate id
-//if it doesn't exist it render a empty td
+/**
+ * render td if time data exist with associate id
+ * if it doesn't exist it render a empty td
+ * @param {*} bench list of bench
+ * @param {*} id key of wanted function
+ * @return {*} TableData JSX
+ */
 function renderDataKey(bench, id) {
   let timeValue = null;
   bench.map((elem) => {
@@ -51,11 +80,18 @@ function renderDataKey(bench, id) {
     );
   } else {
     return (
-      <TableData key={uniqid()} value={format_time(timeValue)} rowSpan={1} />
+      <TableData key={uniqid()} value={formatTime(timeValue)} rowSpan={1} />
     );
   }
 }
-// same as above but for space value
+
+/**
+ * render td if size data exist with associate id
+ * if it doesn't exist it render a empty td
+ * @param {*} bench list of bench
+ * @param {*} id key of wanted function
+ * @return {*} TableData JSX
+ */
 function renderDataKeySpace(bench, id) {
   let spaceValue = null;
   bench.map((elem) => {
@@ -69,24 +105,19 @@ function renderDataKeySpace(bench, id) {
     );
   } else {
     return (
-      <TableData key={uniqid()} value={format_space(spaceValue)} rowSpan={1} />
+      <TableData key={uniqid()} value={formatSize(spaceValue)} rowSpan={1} />
     );
   }
 }
 
 /**
- * Generate a key map from benchmark to know the id and the description of all benchmark
- * that have been fetch
+ * render the tbody from the map and the benchs
+ * @param {*} map list of id of every benchId available in the loaded JSON
+ * @param {*} benchs list of all benchs to render
+ * @return {*} Array of TableRow
  */
-function keyMap(map, benchmarks) {
-  for (var bench in benchmarks) {
-    if (!map.has(benchmarks[bench].id))
-      map.set(benchmarks[bench].id, benchmarks[bench].description);
-  }
-}
-//render the tbody from the map and the benchs
 function renderBenchMap(map, benchs) {
-  let data = [];
+  const data = [];
   map.forEach((value, key, map) => {
     data.push([
       <TableRow
@@ -117,9 +148,13 @@ function renderBenchMap(map, benchs) {
   });
   return data;
 }
-//render the bench platform description
+/**
+ * render the bench platform description
+ * @param {*} benchs list of all benchs to render
+ * @return {*} Array of TableRow
+ */
 function renderBenchInfo(benchs) {
-  let data = [];
+  const data = [];
   data.push(
     <TableRow
       key={uniqid()}
@@ -201,7 +236,7 @@ function renderBenchInfo(benchs) {
   );
   return data;
 }
-//render the bench information description
+// render the bench information description
 const renderTableInformation = (map) => {
   return (
     <table className="table-information">
@@ -225,50 +260,54 @@ const renderTableInformation = (map) => {
  * Order, row by row, the fastest to slowest benchmark
  * @param {*} map available id
  * @param {*} jsons all charged jsons
+ * @return {*} list of sorted array for each benchmark from the fastest/lighter bench to the slowest/heavier
  */
 const ranking = (map, jsons) => {
-  let ranksTime = [];
-  let ranksSize = [];
+  const ranksTime = [];
+  const ranksSize = [];
   map.forEach((elementMap, key) => {
-    let unsortedResult = [];
+    const unsortedResult = [];
 
     jsons.map((json, index) => {
       json.bench.map((benchmark) => {
         if (benchmark.id === key) {
           benchmark["index"] = index;
-          unsortedResult[index] = benchmark;
+          unsortedResult.push(benchmark);
         }
       });
     });
     console.log();
-    //unsortedResult.map((e) => console.log(e));
-    ranksSize[key] = unsortedResult
+    // unsortedResult.map((e) => console.log(e));
+    ranksSize[key] = [...unsortedResult.sort((a, b) => a.size - b.size)];
+    /* ranksSize[key] = unsortedResult
       .sort(function (a, b) {
         return a.size - b.size;
       })
-      .slice();
+      .slice();*/
     ranksTime[key] = unsortedResult.sort(function (a, b) {
       return a.time - b.time;
     });
   });
-
+  console.log("ranking : ");
+  console.log(ranksSize);
+  console.log(ranksTime);
   return [ranksTime, ranksSize];
 };
 
 const Table = (props) => {
-  //Destructuring props
+  // Destructuring props
   const { thead, jsons, benchIdMap, showGradient, comparisonMargin } = props;
   const benchs = [];
   jsons.forEach((e) => benchs.push(e.bench));
-  //console.log(benchIdMap.length);
-  let map = new Map();
+  // console.log(benchIdMap.length);
+  const map = new Map();
   if (benchIdMap != null) {
-    //benchIdMap.forEach((element) => console.log(element));
+    // benchIdMap.forEach((element) => console.log(element));
     benchIdMap.forEach((element, key) => map.set(key, element));
   }
   const [ranksTime, ranksSize] = ranking(benchIdMap, jsons);
-  //benchs.forEach((el) => keyMap(map, el));
-  //map.forEach((element) => console.log(element));
+  // benchs.forEach((el) => keyMap(map, el));
+  // map.forEach((element) => console.log(element));
   const deleteColumn = (key) => {
     console.log("deleting colum :" + key);
     props.deleteJson(key);

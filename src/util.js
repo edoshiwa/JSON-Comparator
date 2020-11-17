@@ -3,18 +3,19 @@
  * @param {*} integer time value
  * @param {*} symbol unit name of the value
  * @param {*} targetSymbol unit name of the target unit
+ * @return {*} a string of time value converted to target symbol with the target symbol added
  */
-export function format_time(
+export function formatTime(
   integer,
   symbol = "nanosecond",
   targetSymbol = "microsecond"
 ) {
-  let siNames = ["nanosecond", "microsecond", "millisecond", "second"];
-  let siSymbols = ["ns", "µs", "ms", "s"];
-  let expos = [-24, -21, -18, -15, -12, -9, -6, -3, 0];
+  const siNames = ["nanosecond", "microsecond", "millisecond", "second"];
+  const siSymbols = ["ns", "µs", "ms", "s"];
+  const expos = [-24, -21, -18, -15, -12, -9, -6, -3, 0];
 
-  let index = siNames.indexOf(symbol);
-  let baseIndexExp = index === -1 ? siNames.indexOf("nanosecond") : index;
+  const index = siNames.indexOf(symbol);
+  const baseIndexExp = index === -1 ? siNames.indexOf("nanosecond") : index;
   let expIndex;
   if (targetSymbol == null) {
     expIndex = baseIndexExp;
@@ -25,7 +26,7 @@ export function format_time(
       expIndex++;
     }
   } else {
-    let targetIndex = siNames.indexOf(targetSymbol);
+    const targetIndex = siNames.indexOf(targetSymbol);
     expIndex =
       targetSymbol === -1 ? siNames.indexOf("nanosecond") : targetIndex;
   }
@@ -41,13 +42,14 @@ export function format_time(
  * Find the most appropriated symbol for a given time value (with less digit)
  * @param {*} integer time value
  * @param {*} symbol unit name
+ * @return {*} the smallest unit for the time value to be still readable
  */
-export function adapted_time_symbol(integer, symbol = "nanosecond") {
-  let siNames = ["nanosecond", "microsecond", "millisecond", "second"];
-  let expos = [-24, -21, -18, -15, -12, -9, -6, -3, 0];
+export function adaptedTimeSymbol(integer, symbol = "nanosecond") {
+  const siNames = ["nanosecond", "microsecond", "millisecond", "second"];
+  const expos = [-24, -21, -18, -15, -12, -9, -6, -3, 0];
 
-  let index = siNames.indexOf(symbol);
-  let baseIndexExp = index === -1 ? siNames.indexOf("nanosecond") : index;
+  const index = siNames.indexOf(symbol);
+  const baseIndexExp = index === -1 ? siNames.indexOf("nanosecond") : index;
   let expIndex = baseIndexExp;
   while (
     expIndex + 1 <= expos.length &&
@@ -62,11 +64,12 @@ export function adapted_time_symbol(integer, symbol = "nanosecond") {
  * @param {*} integer size value
  * @param {*} symbol unit name of the value
  * @param {*} targetSymbol unit name of the target unit
+ * @return {*} a string of size value converted to target symbol with the target symbol added
  */
-export function format_space(integer, symbol = "octet", targetSymbol = null) {
-  let siNames = ["octet", "kibioctet", "mebioctet", "gibioctet", "tebioctet"];
-  let siSymbols = ["o", "Kio", "Mio", "Gio", "Tio"];
-  let baseExp = siNames.indexOf(symbol) === -1 ? 0 : siNames.indexOf(symbol);
+export function formatSize(integer, symbol = "octet", targetSymbol = null) {
+  const siNames = ["octet", "kibioctet", "mebioctet", "gibioctet", "tebioctet"];
+  const siSymbols = ["o", "Kio", "Mio", "Gio", "Tio"];
+  const baseExp = siNames.indexOf(symbol) === -1 ? 0 : siNames.indexOf(symbol);
   let exp;
   if (targetSymbol == null) {
     exp = siNames.indexOf(symbol);
@@ -86,10 +89,11 @@ export function format_space(integer, symbol = "octet", targetSymbol = null) {
  * Find the most appropriated symbol for a given size value (with less digit)
  * @param {*} integer size value
  * @param {*} symbol unit name
+ * @return {*} the smallest unit for the size value to be still readable
  */
-export function adapted_space_symbol(integer, symbol = "octet") {
-  let siNames = ["octet", "kibioctet", "mebioctet", "gibioctet", "tebioctet"];
-  let baseExp = siNames.indexOf(symbol) === -1 ? 0 : siNames.indexOf(symbol);
+export function adaptedSizeSymbol(integer, symbol = "octet") {
+  const siNames = ["octet", "kibioctet", "mebioctet", "gibioctet", "tebioctet"];
+  const baseExp = siNames.indexOf(symbol) === -1 ? 0 : siNames.indexOf(symbol);
   let exp;
 
   exp = siNames.indexOf(symbol);
