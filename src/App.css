@@ -148,3 +148,26 @@ body {
   font-weight: 800;
   color: rgb(41, 62, 81);
 }
+
+.layout {
+  float: none; /* add this */
+  color: rgb(41, 62, 81);
+  font-weight: 800;
+  font-size: 12pt;
+  font-family: "Source Sans Pro", sans-serif;
+}
+
+.menu-nav {
+  float: "right";
+  border-bottom: "none";
+}
+.button-nav {
+  color: red;
+}
+.button-nav:hover {
+  color: rgb(0, 125, 130);
+  border-bottom: "none";
+}
+.benchmark-launcher {
+  border: 1px solid black;
+}

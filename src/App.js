@@ -354,6 +354,7 @@ class App extends React.Component {
             <Dropdown
               overlay={this.state.menu}
               onVisibleChange={() => this.fetchJsonList()}
+              disabled={this.state.jsonFileName.length === 0 ? true : false}
             >
               <a
                 className="ant-dropdown-link"
