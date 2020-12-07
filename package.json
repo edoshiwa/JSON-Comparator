@@ -15,6 +15,8 @@
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.0",
+    "react-spinners": "^0.9.0",
+    "recharts": "^1.8.5",
     "styled-components": "^5.2.0",
     "uniqid": "^5.2.0"
   },
