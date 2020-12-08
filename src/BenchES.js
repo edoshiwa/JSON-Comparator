@@ -2,10 +2,13 @@
 /* eslint-disable valid-jsdoc */
 import * as Benchmark from "./Bench.js";
 import React from "react";
-import { Divider } from "antd";
+import { Divider, Popover, Tag, Alert, Button } from "antd";
+import { RightCircleTwoTone, StopTwoTone } from "@ant-design/icons";
 import { Table } from "./component/Table";
 import styled from "styled-components";
 import * as format from "./util";
+import { ClockLoader } from "react-spinners";
+import { LineChart, XAxis, YAxis, Tooltip, Legend, Line } from "recharts";
 const Styles = styled.div`
   overflow-x: auto;
   td {
@@ -17,12 +20,52 @@ const Styles = styled.div`
     border: 1px solid black;
   }
 `;
+const LaunchButton = styled.button`
+  background: ${(props) =>
+    props.disabled
+      ? "radial-gradient(circle, rgba(0,125,130,0.50) 0%, rgba(0,157,99,0.50) 100%);"
+      : "radial-gradient(circle, rgba(0,125,130,1) 0%, rgba(0,157,99,1) 100%);"};
+  color: ${(props) => (props.disabled ? "#7f7f82" : "#ffffff")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "auto")};
+`;
+const pending = <Tag color="gold">Pending</Tag>;
+const clockSpinner = <ClockLoader color="#007d82" size="25px" />;
 const availableBench = Benchmark.Description;
-const columns = [
-  { title: "Description", dataIndex: "description" },
-  { title: "Time", dataIndex: "time" },
-  { title: "Size", dataIndex: "size" },
-];
+const columns =
+  "memory" in performance
+    ? [
+        { title: "Description", dataIndex: "description" },
+        { title: "Time", dataIndex: "time" },
+        { title: "Memory used", dataIndex: "size" },
+        { title: "Memory graph", dataIndex: "graph" },
+      ]
+    : [
+        { title: "Description", dataIndex: "description" },
+        { title: "Time", dataIndex: "time" },
+      ];
+/**
+ * @return {*}
+ */
+const WarningDiv = () => {
+  return (
+    <Alert
+      message="Unsupported browser"
+      description="To measure accurately the memory used by the benchmarks you need to use a browser that support the Performance.memory API."
+      action={
+        <Button
+          type="link"
+          href="https://developer.mozilla.org/en-US/docs/Web/API/Performance/memory#Browser_compatibility"
+          target="_blank"
+        >
+          List of supported browser
+        </Button>
+      }
+      showIcon
+      closable
+      type="warning"
+    />
+  );
+};
 
 /**
  * @return {*} a table
@@ -56,6 +99,7 @@ class BenchES extends React.Component {
         description: value,
         time: null,
         size: null,
+        graph: <Tag>No graph yet for this benchmark</Tag>,
       });
     }
     return result;
@@ -74,6 +118,12 @@ class BenchES extends React.Component {
   addToQueue() {
     const bench = this.state.benchQueue;
     const bench2 = [...bench, ...this.state.selectedRows];
+
+    bench2.map((el, index) =>
+      index === 0
+        ? this.changeData(el, clockSpinner, clockSpinner)
+        : this.changeData(el, pending, pending)
+    );
     this.setState(
       {
         benchQueue: bench2,
@@ -118,8 +168,10 @@ class BenchES extends React.Component {
             benchResult.size,
             bench.unit.size,
             format.adaptedSizeSymbol(benchResult.size)
-          )
+          ),
+          this.popUp(benchResult.data)
         );
+        if (tmp !== null) this.changeData(tmp[0], clockSpinner, clockSpinner);
         bench.bench.push(benchResult);
         if (typeof functionFromString === "function") functionFromString();
         console.log(tmp);
@@ -131,16 +183,53 @@ class BenchES extends React.Component {
   }
   /**
    *
+   * @param {*} data
+   */
+  popUp(data) {
+    return (
+      <Popover content={this.graph(data)} trigger="click">
+        <Tag>Show graph</Tag>
+      </Popover>
+    );
+  }
+  /**
+   *
+   * @param {*} data
+   */
+  graph(data) {
+    return (
+      <LineChart
+        width={250}
+        height={250}
+        data={data}
+        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+      >
+        <XAxis dataKey="name" />
+        <YAxis />
+        <Tooltip />
+        <Legend />
+        <Line
+          type="monotone"
+          dataKey="usedJSHeapSize"
+          stroke="#C70039"
+          dot={false}
+        />
+      </LineChart>
+    );
+  }
+  /**
+   *
    * @param {*} key
    * @param {*} newTime
    * @param {*} newSize
    */
-  changeData(key, newTime, newSize) {
+  changeData(key, newTime, newSize, newGraph = 0) {
     const currentData = this.state.data;
     currentData.map((data) => {
       if (data.key === key) {
         data.time = newTime;
         data.size = newSize;
+        if (newGraph !== 0) data.graph = newGraph;
       }
     });
     this.setState({ data: currentData });
@@ -159,6 +248,14 @@ class BenchES extends React.Component {
       <>
         <h1>JS Benchmark</h1>
         <Divider />
+        {"memory" in performance ? (
+          <></>
+        ) : (
+          <>
+            <WarningDiv />
+            <Divider />
+          </>
+        )}
         <Styles>
           <Table
             rowSelection={rowSelection}
@@ -166,14 +263,20 @@ class BenchES extends React.Component {
             data={this.state.data}
             checkboxes={true}
           />
-          <button
+
+          <LaunchButton
             onClick={this.addToQueue}
             disabled={
               this.state.selectedRows.length === 0 || this.state.isBenching
             }
           >
+            {this.state.selectedRows.length === 0 || this.state.isBenching ? (
+              <StopTwoTone twoToneColor="#7f7f82" />
+            ) : (
+              <RightCircleTwoTone twoToneColor="#007d82" />
+            )}{" "}
             Add selection to Benchmark&apos;s Queue
-          </button>
+          </LaunchButton>
           <Divider />
           <div></div>
         </Styles>
