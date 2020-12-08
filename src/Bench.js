@@ -24,6 +24,14 @@ export const Description = {
     */
 };
 /**
+ * @return {*}
+ */
+function currentMemory() {
+  if ("memory" in performance) {
+    return performance.memory.usedJSHeapSize;
+  } else return NaN;
+}
+/**
  *
  * @param {*} data
  * @return {*} adjusted memory
@@ -44,8 +52,8 @@ function memoryAnalyzer(data) {
     totalMemory / (data.length - numberOfGarbageCollection);
   const adujestedTotalMemory =
     totalMemory + meanMemoryByStep * numberOfGarbageCollection;
-  console.log({ meanMemoryByStep });
-  console.log({ data });
+  console.log({ totalMemory });
+  console.log({ adujestedTotalMemory });
   return adujestedTotalMemory;
 }
 /**
@@ -71,7 +79,7 @@ function randomString(length) {
  * @return {*} a tab filled with ONE strong random number, ONE MILLION TIME
  */
 function b_arr_int_fill() {
-  const memoryBefore = performance.memory.usedJSHeapSize;
+  const memoryBefore = currentMemory();
   const memorySave = [];
   const tab = new Int32Array(Number.ONE_MILLION);
   const strongRng = new Int32Array(1);
@@ -84,66 +92,66 @@ function b_arr_int_fill() {
   ) {
     memorySave.push({
       name: index,
-      usedJSHeapSize: performance.memory.usedJSHeapSize - memoryBefore,
+      usedJSHeapSize: currentMemory() - memoryBefore,
     });
   }
-  return [performance.memory.usedJSHeapSize - memoryBefore, memorySave];
+  return [currentMemory() - memoryBefore, memorySave];
 }
 /**
  * "Creating array of 1 000 000 identical int with a for loop"
  * @return {*} a tab filled with ONE MILLION strong random number, ONE MILLION TIME
  */
 function b_arr_int_for() {
-  const memoryBefore = performance.memory.usedJSHeapSize;
+  const memoryBefore = currentMemory();
   const memorySave = [];
   const tab = new Int32Array(Number.ONE_MILLION);
   for (let index = 0; index < Number.ONE_MILLION; index++) {
     if ((index / Number.ONE_MILLION) * 100 >= memorySave.length)
       memorySave.push({
         name: index,
-        usedJSHeapSize: performance.memory.usedJSHeapSize,
+        usedJSHeapSize: currentMemory(),
       });
     const strongRng = new Int32Array(1);
     window.crypto.getRandomValues(strongRng);
     tab[index] = strongRng[0];
   }
-  return [performance.memory.usedJSHeapSize - memoryBefore, memorySave];
+  return [currentMemory() - memoryBefore, memorySave];
 }
 /**
  * Creating array of 100 000 random strings that are 14 chars long
  * @return {*} a tab filled with 100 000 random strings that are 14 chars long
  */
 function b_arr_str_low() {
-  const memoryBefore = performance.memory.usedJSHeapSize;
+  const memoryBefore = currentMemory();
   const memorySave = [];
   const tab = [];
   for (let index = 0; index < Number.ONE_HUNDRED_THOUSAND; index++) {
     if ((index / Number.ONE_HUNDRED_THOUSAND) * 100 >= memorySave.length)
       memorySave.push({
         name: index,
-        usedJSHeapSize: performance.memory.usedJSHeapSize,
+        usedJSHeapSize: currentMemory(),
       });
     tab[index] = randomString(Number.RANDOM_STRING_LENGTH);
   }
-  return [performance.memory.usedJSHeapSize - memoryBefore, memorySave];
+  return [currentMemory() - memoryBefore, memorySave];
 }
 /**
  * Creating array of 1 000 000 random strings that are 14 chars long
  * @return {*} a tab filled with 1 000 000 random strings that are 14 chars long
  */
 function b_arr_str_high() {
-  const memoryBefore = performance.memory.usedJSHeapSize;
+  const memoryBefore = currentMemory();
   const memorySave = [];
   const tab = [];
   for (let index = 0; index < Number.ONE_MILLION; index++) {
     if ((index / Number.ONE_MILLION) * 100 >= memorySave.length)
       memorySave.push({
         name: index,
-        usedJSHeapSize: performance.memory.usedJSHeapSize,
+        usedJSHeapSize: currentMemory(),
       });
     tab[index] = randomString(Number.RANDOM_STRING_LENGTH);
   }
-  return [performance.memory.usedJSHeapSize - memoryBefore, memorySave];
+  return [currentMemory() - memoryBefore, memorySave];
 }
 
 /**
@@ -151,7 +159,7 @@ function b_arr_str_high() {
  * @return {*} bench info, id, time, size, description
  */
 export function bench(functionToBench) {
-  const memoryBefore = performance.memory.usedJSHeapSize;
+  const memoryBefore = currentMemory();
   const timeBefore = performance.now();
   let memoryUsed;
   let data;

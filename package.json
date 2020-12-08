@@ -3,21 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^4.2.4",
-    "@testing-library/react": "^9.5.0",
-    "@testing-library/user-event": "^7.2.1",
+    "@testing-library/jest-dom": "^5.11.6",
+    "@testing-library/react": "^11.2.2",
+    "@testing-library/user-event": "^12.5.0",
     "ajv": "^6.12.6",
-    "antd": "^4.7.0",
-    "bootstrap": "^4.5.2",
-    "material-components-web": "^7.0.0",
-    "react": "^16.13.1",
+    "antd": "^4.9.2",
+    "bootstrap": "^4.5.3",
+    "material-components-web": "^8.0.0",
+    "react": "^17.0.1",
     "react-beautiful-dnd": "^13.0.0",
-    "react-dom": "^16.13.1",
+    "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^4.0.0",
+    "react-scripts": "^4.0.1",
     "react-spinners": "^0.9.0",
     "recharts": "^1.8.5",
-    "styled-components": "^5.2.0",
+    "styled-components": "^5.2.1",
     "uniqid": "^5.2.0"
   },
   "scripts": {
@@ -43,9 +43,9 @@
   },
   "devDependencies": {
     "babel-eslint": "^10.1.0",
-    "eslint": "^7.13.0",
+    "eslint": "^7.15.0",
     "eslint-config-google": "^0.14.0",
-    "eslint-config-prettier": "^6.15.0",
+    "eslint-config-prettier": "^7.0.0",
     "eslint-plugin-react": "^7.21.5"
   }
 }
