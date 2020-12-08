@@ -25,6 +25,31 @@ export const Description = {
 };
 /**
  *
+ * @param {*} data
+ * @return {*} adjusted memory
+ */
+function memoryAnalyzer(data) {
+  let previousMemory = data[0].usedJSHeapSize;
+  let currentMemory;
+  let totalMemory = 0;
+  let numberOfGarbageCollection = 0;
+  for (let i = 1; i < data.length; i++) {
+    currentMemory = data[i].usedJSHeapSize;
+    if (currentMemory >= previousMemory)
+      totalMemory += currentMemory - previousMemory;
+    else numberOfGarbageCollection++;
+    previousMemory = currentMemory;
+  }
+  const meanMemoryByStep =
+    totalMemory / (data.length - numberOfGarbageCollection);
+  const adujestedTotalMemory =
+    totalMemory + meanMemoryByStep * numberOfGarbageCollection;
+  console.log({ meanMemoryByStep });
+  console.log({ data });
+  return adujestedTotalMemory;
+}
+/**
+ *
  * @param {*} length
  * @return {*} random string from alplanumeric chars of length char
  */
@@ -134,15 +159,19 @@ export function bench(functionToBench) {
   switch (functionToBench) {
     case "b_arr_str_low":
       [memoryUsed, data] = b_arr_str_low();
+      memoryUsed = memoryAnalyzer(data);
       break;
     case "b_arr_str_high":
       [memoryUsed, data] = b_arr_str_high();
+      memoryUsed = memoryAnalyzer(data);
       break;
     case "b_arr_int_for":
       [memoryUsed, data] = b_arr_int_for();
+      memoryUsed = memoryAnalyzer(data);
       break;
     case "b_arr_int_fill":
       [memoryUsed, data] = b_arr_int_fill();
+      memoryUsed = memoryAnalyzer(data);
       break;
 
     default:
