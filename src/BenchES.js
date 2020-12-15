@@ -9,6 +9,7 @@ import styled from "styled-components";
 import * as format from "./util";
 import { ClockLoader } from "react-spinners";
 import { LineChart, XAxis, YAxis, Tooltip, Legend, Line } from "recharts";
+// Style for our table
 const Styles = styled.div`
   overflow-x: auto;
   td {
@@ -20,6 +21,7 @@ const Styles = styled.div`
     border: 1px solid black;
   }
 `;
+// Style for our button
 const LaunchButton = styled.button`
   background: ${(props) =>
     props.disabled
@@ -28,9 +30,13 @@ const LaunchButton = styled.button`
   color: ${(props) => (props.disabled ? "#7f7f82" : "#ffffff")};
   cursor: ${(props) => (props.disabled ? "not-allowed" : "auto")};
 `;
+// Resuable pending tag
 const pending = <Tag color="gold">Pending</Tag>;
+// Reuasble Spinner
 const clockSpinner = <ClockLoader color="#007d82" size="25px" />;
+// All available bench
 const availableBench = Benchmark.Description;
+// Table columns information to use in our Table component
 const columns =
   "memory" in performance
     ? [
@@ -44,7 +50,9 @@ const columns =
         { title: "Time", dataIndex: "time" },
       ];
 /**
- * @return {*}
+ * A message error that is displayed if the user's browser doesn't support
+ * the performance.memory API
+ * @return {Object} An alert JSX Object
  */
 const WarningDiv = () => {
   return (
@@ -68,14 +76,15 @@ const WarningDiv = () => {
 };
 
 /**
- * @return {*} a table
+ * JS Benchmark class, it will mainly return a table with
+ * the benchmarks result in it.
+ * @return {*} a h1, a divided, an error message if needed, a table and two buttons
  */
 class BenchES extends React.Component {
   /**
-   *
-   * @param {*} props
+   * Constructor of the class, no argument are needed.
    */
-  constructor(props) {
+  constructor() {
     super();
     this.onSelectChange = this.onSelectChange.bind(this);
     this.addToQueue = this.addToQueue.bind(this);
@@ -84,12 +93,17 @@ class BenchES extends React.Component {
     this.state = {
       selectedRows: [],
       data: this.initData(),
+      benchResults: [],
+      benchInfo: null,
       isBenching: false,
       nextBenchmarks: [],
       currentBench: [],
       benchQueue: [],
     };
   }
+  /**
+   * Initialize the data to print the first table
+   */
   initData = () => {
     const result = [];
 
@@ -105,15 +119,14 @@ class BenchES extends React.Component {
     return result;
   };
   /**
-   *
+   * Update state with checked chechboxes
    * @param {*} selectedRowKeys
    */
   onSelectChange(selectedRowKeys) {
     this.setState({ selectedRows: selectedRowKeys });
   }
   /**
-   *
-   * @param {*} selectedRows
+   * Add checked function to benchmark's queue
    */
   addToQueue() {
     const bench = this.state.benchQueue;
@@ -135,55 +148,68 @@ class BenchES extends React.Component {
     );
   }
   /**
-   *
+   * Everytime the component update it will check if
+   * there is benchmark to do left, if there isn't
+   * It will clear the interval
    */
   componentDidUpdate() {
     if (this.state.benchQueue.length == 0) {
       clearInterval(this.myInterval);
-      // this.doBenchmarks();
     }
   }
   /**
-   *
+   * If there is no other benchmark ongoing
+   * And a benchmark in queue
+   * It will do the benchmark
+   * Take the result
+   * Update the table with the result
    */
   doBenchmarks() {
     if (!this.state.isBenching) {
-      const tmp2 = this.state.benchQueue;
-      console.log(tmp2);
       const bench = Benchmark.benchInfo();
+      const benchResults = this.state.benchResults;
       this.setState({ isBenching: true });
       if (this.state.benchQueue.length > 0) {
         const tmp = this.state.benchQueue;
         const functionToBench = tmp.shift();
-        const functionFromString = window[Benchmark];
+        // const functionFromString = window[Benchmark];
         const benchResult = Benchmark.bench(functionToBench);
-        this.changeData(
-          functionToBench,
-          format.formatTime(
-            benchResult.time,
-            bench.unit.time,
-            format.adaptedTimeSymbol(benchResult.time)
-          ),
-          format.formatSize(
-            benchResult.size,
-            bench.unit.size,
-            format.adaptedSizeSymbol(benchResult.size)
-          ),
-          this.popUp(benchResult.data)
-        );
-        if (tmp !== null) this.changeData(tmp[0], clockSpinner, clockSpinner);
-        bench.bench.push(benchResult);
-        if (typeof functionFromString === "function") functionFromString();
-        console.log(tmp);
-        this.setState({ benchQueue: tmp });
+        if (!("error" in benchResult)) {
+          benchResults[functionToBench] = benchResult;
+          this.changeData(
+            functionToBench,
+            format.formatTime(
+              benchResult.time,
+              bench.unit.time,
+              format.adaptedTimeSymbol(benchResult.time)
+            ),
+            format.formatSize(
+              benchResult.size,
+              bench.unit.size,
+              format.adaptedSizeSymbol(benchResult.size)
+            ),
+            this.popUp(benchResult.data)
+          );
+          if (tmp !== null) this.changeData(tmp[0], clockSpinner, clockSpinner);
+          // if (typeof functionFromString === "function") functionFromString();
+          this.setState({ benchQueue: tmp });
+        } else {
+          if (tmp !== null) this.changeData(tmp[0], clockSpinner, clockSpinner);
+          console.error(benchResult.error);
+          this.setState({ benchQueue: tmp });
+        }
       }
-      console.log({ bench: bench });
-      this.setState({ isBenching: false });
+      this.setState({
+        isBenching: false,
+        benchInfo: bench,
+        benchResults: benchResults,
+      });
     }
   }
   /**
-   *
+   * Create a popup with a graph
    * @param {*} data
+   * @return {Object} a JSX object, a pop over
    */
   popUp(data) {
     return (
@@ -193,8 +219,9 @@ class BenchES extends React.Component {
     );
   }
   /**
-   *
-   * @param {*} data
+   * Draw a graph of registred memory at different time
+   * @param {Array} data Array of memory point
+   * @return {Object} LineChart
    */
   graph(data) {
     return (
@@ -218,10 +245,10 @@ class BenchES extends React.Component {
     );
   }
   /**
-   *
-   * @param {*} key
-   * @param {*} newTime
-   * @param {*} newSize
+   * Update table data
+   * @param {*} key of the bench function to update in the table
+   * @param {*} newTime value to print
+   * @param {*} newSize value to print
    */
   changeData(key, newTime, newSize, newGraph = 0) {
     const currentData = this.state.data;
@@ -236,7 +263,53 @@ class BenchES extends React.Component {
   }
 
   /**
-   * @return {*} a table
+   * Save done benchmarks as JSON on user's browser
+   */
+  saveAsJSON() {
+    const bench = this.state.benchInfo;
+    for (const benchResult in this.state.benchResults) {
+      if (
+        (this.state.benchResults[benchResult].hasOwnProperty("time") &&
+          this.state.benchResults[benchResult].time != null &&
+          this.state.benchResults[benchResult].time != NaN) ||
+        (this.state.benchResults[benchResult].hasOwnProperty("size") &&
+          this.state.benchResults[benchResult].size != null &&
+          this.state.benchResults[benchResult].size != NaN)
+      ) {
+        console.log("bench result :");
+        console.log({ benchResult });
+        const description = this.state.benchResults[benchResult].description;
+        console.log("time : ");
+        console.log(this.state.benchResults[benchResult].time);
+        console.log("size : ");
+        console.log(this.state.benchResults[benchResult].size);
+        console.log("bench : ");
+        console.log(this.state.benchResults[benchResult]);
+        const time = this.state.benchResults[benchResult].time;
+        const size = this.state.benchResults[benchResult].size;
+        const id = this.state.benchResults[benchResult].id;
+        bench["bench"].push({
+          description: description,
+          time: time,
+          size: Math.trunc(size),
+          id: id,
+        });
+      }
+    }
+    console.log(bench);
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(JSON.stringify(bench));
+    const downloadAnchorNode = document.createElement("a");
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "exportName" + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
+  /**
+   * @return {*} a h1, a divided, an error message if needed, a table and two buttons
    */
   render() {
     const { selectedRows } = this.state;
@@ -277,8 +350,7 @@ class BenchES extends React.Component {
             )}{" "}
             Add selection to Benchmark&apos;s Queue
           </LaunchButton>
-          <Divider />
-          <div></div>
+          <button onClick={() => this.saveAsJSON()}>Save</button>
         </Styles>
       </>
     );

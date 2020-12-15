@@ -3,6 +3,9 @@
 
 import Person from "./Person";
 
+/**
+ * Constant to improve readability
+ */
 const CustomNumber = {
   ONE_MILLION: 1000000,
   ONE_HUNDRED_THOUSAND: 100000,
@@ -10,6 +13,11 @@ const CustomNumber = {
   RANDOM_STRING_LENGTH: 14,
   GRAPH_PERCENTAGE_STEP: 1,
 };
+/**
+ * All available bench and their description
+ * If you add a bench, don't forget to add a
+ * description there.
+ */
 export const Description = {
   b_arr_str_low:
     "Creating array of 100 000 random strings that are 14 chars long",
@@ -26,7 +34,10 @@ export const Description = {
     "Creating associative array of 500 000 int with key strings that are 14 chars long and searching each one and sending back an array of every value",
 };
 /**
- * @return {*}
+ * If the performance.memory API is available
+ * it  will return the current heap memory used by
+ * JS. Else it return NaN.
+ * @return {Number} memory in Octet
  */
 function currentMemory() {
   if ("memory" in performance) {
@@ -34,9 +45,14 @@ function currentMemory() {
   } else return NaN;
 }
 /**
- *
- * @param {*} data
- * @return {*} adjusted memory
+ * Analyze an array of registered memory and return the
+ * Adjusted Cumulative memory.
+ * If tab[a+1]<tab[a] it won't add to the total
+ * If there is x point like tab[a+1]<tab[a] we adjust the
+ * final result like this :
+ * adjusted memory = total memory + ((total memory)/(total point - x))*x
+ * @param {Int16Array} data Array of Integer reprensenting memory.
+ * @return {Number} adjusted memory
  */
 function memoryAnalyzer(data) {
   let previousMemory = data[0].usedJSHeapSize;
@@ -54,14 +70,12 @@ function memoryAnalyzer(data) {
     totalMemory / (data.length - numberOfGarbageCollection);
   const adujestedTotalMemory =
     totalMemory + meanMemoryByStep * numberOfGarbageCollection;
-  console.log({ totalMemory });
-  console.log({ adujestedTotalMemory });
   return adujestedTotalMemory;
 }
 /**
- *
- * @param {*} length
- * @return {*} random string from alplanumeric chars of length char
+ * Generate a random string
+ * @param {Number} length of the wanted random string
+ * @return {String} random string from alplanumeric chars of length char
  */
 export function randomString(length) {
   let result = "";
@@ -78,7 +92,8 @@ export function randomString(length) {
 
 /**
  * "Creating array of 1 000 000 identical int with array fill"
- * @return {*} a tab filled with ONE strong random number, ONE MILLION TIME
+ * @return {Array} time taken to execute the benchmark and positive cumulative
+ * used by the bench
  */
 function b_arr_int_fill() {
   const timeBefore = performance.now();
@@ -102,7 +117,8 @@ function b_arr_int_fill() {
 }
 /**
  * "Creating array of 1 000 000 identical int with a for loop"
- * @return {*} a tab filled with ONE MILLION strong random number, ONE MILLION TIME
+ * @return {Array} time taken to execute the benchmark and positive cumulative
+ * used by the bench
  */
 function b_arr_int_for() {
   const timeBefore = performance.now();
@@ -122,7 +138,8 @@ function b_arr_int_for() {
 }
 /**
  * Creating array of 100 000 random strings that are 14 chars long
- * @return {*} a tab filled with 100 000 random strings that are 14 chars long
+ * @return {Array} time taken to execute the benchmark and positive cumulative
+ * used by the bench
  */
 function b_arr_str_low() {
   const timeBefore = performance.now();
@@ -140,7 +157,8 @@ function b_arr_str_low() {
 }
 /**
  * Creating array of 1 000 000 random strings that are 14 chars long
- * @return {*} a tab filled with 1 000 000 random strings that are 14 chars long
+ * @return {Array} time taken to execute the benchmark and positive cumulative
+ * used by the bench
  */
 function b_arr_str_high() {
   const timeBefore = performance.now();
@@ -157,7 +175,9 @@ function b_arr_str_high() {
   return [performance.now() - timeBefore, memorySave];
 }
 /**
- * @return {*}
+ * Creating 100 000 objects with 7 properties (3 Strings that are 14 chars long and int) and dynamically add one string property to each that are 14 chars long
+ * @return {Array} time taken to execute the benchmark and positive cumulative
+ * used by the bench
  */
 function b_obj() {
   const timeBefore = performance.now();
@@ -175,7 +195,9 @@ function b_obj() {
   return [performance.now() - timeBefore, memorySave];
 }
 /**
- * @return {*}
+ * Creating associative array of 500 000 int with key strings that are 14 chars long
+ * @return {Array} time taken to execute the benchmark and positive cumulative
+ * used by the bench
  */
 function b_asso_array() {
   const timeBefore = performance.now();
@@ -192,7 +214,9 @@ function b_asso_array() {
   return [performance.now() - timeBefore, memorySave];
 }
 /**
- * @return {*}
+ * Creating associative array of 500 000 int with key strings that are 14 chars long and searching each one and sending back an array of every value
+ * @return {Array} time taken to execute the benchmark and positive cumulative
+ * used by the bench
  */
 function b_search_dict() {
   const memorySave = [];
@@ -220,11 +244,11 @@ function b_search_dict() {
 }
 
 /**
- * @param {*} functionToBench list of string that contains id of the function to bench
- * @return {*} bench info, id, time, size, description
+ * Execute a wanted bench if it exists
+ * @param {String} functionToBench string that contains id of the function to bench
+ * @return {Object} {description, time, size, id} of the bench result
  */
 export function bench(functionToBench) {
-  const timeBefore = performance.now();
   let memoryUsed;
   let timeEllapsed;
   let data;
@@ -257,8 +281,12 @@ export function bench(functionToBench) {
     case "b_search_dict":
       [timeEllapsed, data] = b_search_dict();
       memoryUsed = memoryAnalyzer(data);
+      break;
 
     default:
+      return {
+        error: "function doesn't exist",
+      };
       break;
   }
   //
@@ -271,6 +299,7 @@ export function bench(functionToBench) {
   };
 }
 /**
+ * Give machine information by the time of the benchmark
  * @return {*} platform information, creation date and units used
  */
 export function benchInfo() {
