@@ -14,7 +14,7 @@ const localUrl = "http://localhost/easyvista_training/";
 const apiUrl = "comparator/api.php";
 const urlParameters = "?name=";
 /**
- * App class
+ * Benchmark Comparator Class
  */
 class App extends React.Component {
   // Init WebSocket connection

@@ -1,10 +1,11 @@
 import { randomString } from "./Bench";
 /**
- *
+ * Person class only used for benchmark purpose
  */
 export default class Person {
   /**
-   *
+   * Constructor of the Person, no argument are needed
+   * because every property are random.
    */
   constructor() {
     this.addString = this.addString.bind(this);
@@ -20,8 +21,8 @@ export default class Person {
     this.str;
   }
   /**
-   *
-   * @param {*} str
+   * Add a string dynamicly to the Person.
+   * @param {*} str string to add to the Person.
    */
   addString(str) {
     this.str = str;
