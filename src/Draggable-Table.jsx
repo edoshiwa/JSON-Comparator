@@ -1,3 +1,4 @@
+/* eslint-disable valid-jsdoc */
 import React from "react";
 import styled from "styled-components";
 import { DeleteOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
@@ -425,97 +426,95 @@ function renderDataKeySpace(
 /**
  * JSX Draggable Column
  */
-export default class DraggableTable extends React.Component {
+export default function DraggableTable(props) {
   /**
    * @return {*} A Draggable single-columned Table to emule a column
    */
-  render() {
-    return (
-      <Draggable draggableId={this.props.json.time} index={this.props.index}>
-        {(provided, snapshot) => (
-          <Table
-            {...provided.draggableProps}
-            ref={provided.innerRef}
-            isDragging={snapshot.isDragging}
-          >
-            <thead>
-              <tr {...provided.dragHandleProps}>
-                {renderHeaderWithDel(
-                  this.props.name,
-                  this.props.index,
-                  this.props.deleteColumn,
-                  this.props.swapColumn,
-                  this.props.theadLength
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              <TableRow
-                key={uniqid()}
-                value={[
-                  <TableData
-                    key={uniqid()}
-                    className={"informationData"}
-                    value={this.props.json.platform.version}
-                  ></TableData>,
-                ]}
-              />
-              <TableRow
-                key={uniqid()}
-                value={[
-                  <TableData
-                    key={uniqid()}
-                    className={"informationData"}
-                    value={this.props.json.time}
-                  />,
-                ]}
-              />
-              <TableRow
-                key={uniqid()}
-                value={[
-                  <TableData
-                    className={"informationData"}
-                    key={uniqid()}
-                    value={this.props.json.platform.OS}
-                  ></TableData>,
-                ]}
-              />
-              <TableRow
-                key={uniqid()}
-                value={[
-                  <TableData
-                    key={uniqid()}
-                    className={"informationData"}
-                    value={this.props.json.platform.type}
-                  ></TableData>,
-                ]}
-              />
-              <TableRow
-                key={uniqid()}
-                value={[
-                  <TableData
-                    key={uniqid()}
-                    className={"informationData"}
-                    value={this.props.json.platform.uname}
-                  ></TableData>,
-                ]}
-              />
-              {renderBenchMap(
-                this.props.map,
-                [this.props.json.bench],
-                this.props.json.unit,
-                this.props.ranksTime,
-                this.props.ranksSize,
-                this.props.index,
-                this.props.showGradient,
-                this.props.comparisonMargin
+  return (
+    <Draggable draggableId={props.json.time} index={props.index}>
+      {(provided, snapshot) => (
+        <Table
+          {...provided.draggableProps}
+          ref={provided.innerRef}
+          isDragging={snapshot.isDragging}
+        >
+          <thead>
+            <tr {...provided.dragHandleProps}>
+              {renderHeaderWithDel(
+                props.name,
+                props.index,
+                props.deleteColumn,
+                props.swapColumn,
+                props.theadLength
               )}
-            </tbody>
-          </Table>
-        )}
-      </Draggable>
-    );
-  }
+            </tr>
+          </thead>
+          <tbody>
+            <TableRow
+              key={uniqid()}
+              value={[
+                <TableData
+                  key={uniqid()}
+                  className={"informationData"}
+                  value={props.json.platform.version}
+                ></TableData>,
+              ]}
+            />
+            <TableRow
+              key={uniqid()}
+              value={[
+                <TableData
+                  key={uniqid()}
+                  className={"informationData"}
+                  value={props.json.time}
+                />,
+              ]}
+            />
+            <TableRow
+              key={uniqid()}
+              value={[
+                <TableData
+                  className={"informationData"}
+                  key={uniqid()}
+                  value={props.json.platform.OS}
+                ></TableData>,
+              ]}
+            />
+            <TableRow
+              key={uniqid()}
+              value={[
+                <TableData
+                  key={uniqid()}
+                  className={"informationData"}
+                  value={props.json.platform.type}
+                ></TableData>,
+              ]}
+            />
+            <TableRow
+              key={uniqid()}
+              value={[
+                <TableData
+                  key={uniqid()}
+                  className={"informationData"}
+                  value={props.json.platform.uname}
+                ></TableData>,
+              ]}
+            />
+            {renderBenchMap(
+              props.map,
+              [props.json.bench],
+              props.json.unit,
+              props.ranksTime,
+              props.ranksSize,
+              props.index,
+              props.showGradient,
+              props.comparisonMargin
+            )}
+          </tbody>
+        </Table>
+      )}
+    </Draggable>
+  );
 }
 DraggableTable.propTypes = {
   json: PropTypes.any.isRequired,

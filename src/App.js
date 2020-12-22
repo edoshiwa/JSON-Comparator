@@ -1,6 +1,9 @@
 /* eslint-disable no-invalid-this */
-import { Menu, Dropdown, Divider, Switch, Slider, Row, Col } from "antd";
-import { DownOutlined, UploadOutlined } from "@ant-design/icons";
+import { Dropdown, Divider } from "antd";
+import { DownOutlined } from "@ant-design/icons";
+import {DirPicker, FilesPicker} from "./component/FilePicker/FilePicker"
+import GradientSelector from "./component/GradientSelector/GradientSelector"
+import FileMenu from "./component/FileMenu/FileMenu"
 import { DragDropContext } from "react-beautiful-dnd";
 import schema from "./json-schema.json";
 import Ajv from "ajv";
@@ -10,7 +13,7 @@ import "./App.css";
 
 const uniqid = require("uniqid");
 const webSocketUrl = "ws://localhost:8080/";
-const localUrl = "http://localhost/easyvista_training/";
+const localUrl = "http://localhost/easyvista/";
 const apiUrl = "comparator/api.php";
 const urlParameters = "?name=";
 /**
@@ -39,8 +42,6 @@ class App extends React.Component {
    */
   constructor(props) {
     super();
-    this.handleSliderChange = this.handleSliderChange.bind(this);
-    this.handleDisabledChange = this.handleDisabledChange.bind(this);
     this.updateMap = this.updateMap.bind(this);
     this.onClick = this.onClick.bind(this);
     this.deleteJson = this.deleteJson.bind(this);
@@ -190,7 +191,7 @@ class App extends React.Component {
         .then(
           (res) => {
             this.setState({
-              menu: this.updateMenu(res),
+              menu: <FileMenu arr={res} jsonArrayHeader={this.state.jsonArrayHeader} onClick={this.onClick}/>,
               jsonFileName: res,
               lastTimeFetch: Date.now(),
               menuIsDirty: false,
@@ -204,30 +205,14 @@ class App extends React.Component {
             );
           }
         );
-    } else this.setState({ menu: this.updateMenu(this.state.jsonFileName) });
+    } else this.setState({ menu: <FileMenu arr={this.state.jsonFileName} jsonArrayHeader={this.state.jsonArrayHeader} onClick={this.onClick}/>});
   };
   /**
    * Update Menu item with a list of JSON filenames
    * @param {*} arr : JSON filenames
    * @return {*} a new menu
    */
-  updateMenu(arr) {
-    return (
-      <Menu onClick={this.onClick}>
-        {arr.map((element, index) => (
-          <Menu.Item
-            key={index}
-            title={element}
-            disabled={
-              this.state.jsonArrayHeader.includes(element) ? true : false
-            }
-          >
-            {element}
-          </Menu.Item>
-        ))}
-      </Menu>
-    );
-  }
+  
   /**
    * Handle file that are pass into the browser.
    * Everything happend locally. It will save them the same way
@@ -321,20 +306,6 @@ class App extends React.Component {
     // mapTmp.forEach((element) => console.log(element));
     return mapTmp;
   };
-  /**
-   * Handle change in the trigger button
-   * @param {*} disabled state of the button
-   */
-  handleDisabledChange = (disabled) => {
-    this.setState({ showGradient: disabled });
-  };
-  /**
-   * Handler change in the slider
-   * @param {*} value of the slider
-   */
-  handleSliderChange = (value) => {
-    this.setState({ comparisonMargin: value });
-  };
   /*
    * The render function can be divided in 3 parts
    * 1. The title
@@ -364,57 +335,13 @@ class App extends React.Component {
               </a>
             </Dropdown>
 
-            <label htmlFor="dirpicker" className="input-btn">
-              Select local JSON directory <UploadOutlined />
-            </label>
-            <input
-              type="file"
-              id="dirpicker"
-              name="fileList"
-              directory=""
-              webkitdirectory=""
-              onChange={(e) => this.handleUploadedFiles(e)}
-            />
-            <label htmlFor="filepicker" className="input-btn">
-              Select local JSON file(s) <UploadOutlined />
-            </label>
-            <input
-              type="file"
-              id="filepicker"
-              name="fileList"
-              multiple=""
-              accept=".json"
-              onChange={(e) => this.handleUploadedFiles(e)}
-            />
+            <DirPicker text="Select directory" onChange={(e) => this.handleUploadedFiles(e)}/>
+            <FilesPicker text="Select files" onChange={(e)=>this.handleUploadedFiles(e)}/>
           </div>
           <Divider />
-          <div className="options">
-            <Row>
-              <Col>Comparison type :</Col>
-              <Col>
-                <Switch
-                  checked={this.state.showGradient}
-                  onChange={this.handleDisabledChange}
-                  checkedChildren="Wider Top and Bottom"
-                  unCheckedChildren="Strict Top and Bottom"
-                />
-              </Col>
-              <Col hidden={!this.state.showGradient}>Comparison margin :</Col>
-              <Col span="4" hidden={!this.state.showGradient}>
-                <Slider
-                  min={51}
-                  max={100}
-                  defaultValue={this.state.comparisonMargin}
-                  disabled={!this.state.showGradient}
-                  onChange={this.handleSliderChange}
-                />
-              </Col>
-              <Col hidden={!this.state.showGradient}>
-                {this.state.comparisonMargin} %
-              </Col>
-            </Row>
-          </div>
-
+          <GradientSelector checked={this.state.showGradient} onChangeSwitch={(check) => this.setState({showGradient: check})}
+          onChangeSlider={(value) => this.setState({comparisonMargin: value})} value={this.state.comparisonMargin}/>
+          
           <div id="second">
             <DragDropContext onDragEnd={this.onDragEnd}>
               {

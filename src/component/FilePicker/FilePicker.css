@@ -1,0 +1,14 @@
+.input-btn {
+  margin: 12px;
+  padding: 12px;
+  cursor: pointer;
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 12pt;
+  font-weight: 800;
+  color: rgb(41, 62, 81);
+}
+.input-btn:hover {
+  border: 2px solid rgb(41, 62, 81);
+  border-radius: 12px;
+  padding: 10px;
+}
