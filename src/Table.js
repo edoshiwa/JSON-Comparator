@@ -315,7 +315,7 @@ const Table = (props) => {
   const swapColumn = (a, b) => {
     props.swapJson(a, b);
   };
-  if (jsons.length > 0) {
+  if (thead.length > 0) {
     return (
       <Container>
         <Droppable droppableId={uniqid()} direction="horizontal">

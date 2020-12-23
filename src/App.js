@@ -1,15 +1,14 @@
 /* eslint-disable no-invalid-this */
-import { Dropdown, Divider } from "antd";
-import { DownOutlined } from "@ant-design/icons";
-import {DirPicker, FilesPicker} from "./component/FilePicker/FilePicker"
-import GradientSelector from "./component/GradientSelector/GradientSelector"
-import FileMenu from "./component/FileMenu/FileMenu"
+import { Divider } from "antd";
+import GradientSelector from "./component/JsonComparatorHeader/GradientSelector/GradientSelector";
+import FileMenu from "./component/FileMenu/FileMenu";
 import { DragDropContext } from "react-beautiful-dnd";
 import schema from "./json-schema.json";
 import Ajv from "ajv";
 import React from "react";
 import Table from "./Table.js";
 import "./App.css";
+import JsonFilePicker from "./component/JsonComparatorHeader/JsonFilePicker/JsonFilePicker";
 
 const uniqid = require("uniqid");
 const webSocketUrl = "ws://localhost:8080/";
@@ -49,7 +48,7 @@ class App extends React.Component {
     this.fetchJsonList = this.fetchJsonList.bind(this);
     this.handleUploadedFiles = this.handleUploadedFiles.bind(this);
     this.state = {
-      menu: [],
+      menu: {},
       jsonFileName: [],
       benchIdMap: [],
       menuIsDirty: true,
@@ -191,7 +190,13 @@ class App extends React.Component {
         .then(
           (res) => {
             this.setState({
-              menu: <FileMenu arr={res} jsonArrayHeader={this.state.jsonArrayHeader} onClick={this.onClick}/>,
+              menu: (
+                <FileMenu
+                  arr={res}
+                  jsonArrayHeader={this.state.jsonArrayHeader}
+                  onClick={this.onClick}
+                />
+              ),
               jsonFileName: res,
               lastTimeFetch: Date.now(),
               menuIsDirty: false,
@@ -205,14 +210,23 @@ class App extends React.Component {
             );
           }
         );
-    } else this.setState({ menu: <FileMenu arr={this.state.jsonFileName} jsonArrayHeader={this.state.jsonArrayHeader} onClick={this.onClick}/>});
+    } else
+      this.setState({
+        menu: (
+          <FileMenu
+            arr={this.state.jsonFileName}
+            jsonArrayHeader={this.state.jsonArrayHeader}
+            onClick={this.onClick}
+          />
+        ),
+      });
   };
   /**
    * Update Menu item with a list of JSON filenames
    * @param {*} arr : JSON filenames
    * @return {*} a new menu
    */
-  
+
   /**
    * Handle file that are pass into the browser.
    * Everything happend locally. It will save them the same way
@@ -317,31 +331,26 @@ class App extends React.Component {
    */
   render() {
     return (
-      <div>
+      <>
         <h1>Benchmark comparator</h1>
         <Divider />
         <div id="Wrapper">
-          <div id="first">
-            <Dropdown
-              overlay={this.state.menu}
-              onVisibleChange={() => this.fetchJsonList()}
-              disabled={this.state.jsonFileName.length === 0 ? true : false}
-            >
-              <a
-                className="ant-dropdown-link"
-                onClick={(e) => e.preventDefault()}
-              >
-                Select JSON from server <DownOutlined />
-              </a>
-            </Dropdown>
-
-            <DirPicker text="Select directory" onChange={(e) => this.handleUploadedFiles(e)}/>
-            <FilesPicker text="Select files" onChange={(e)=>this.handleUploadedFiles(e)}/>
-          </div>
+          <JsonFilePicker
+            menu={this.state.menu}
+            disabled={this.state.jsonFileName.length === 0 ? true : false}
+            fetchJsonList={() => this.fetchJsonList()}
+            handleUploadedFiles={(e) => this.handleUploadedFiles(e)}
+          />
           <Divider />
-          <GradientSelector checked={this.state.showGradient} onChangeSwitch={(check) => this.setState({showGradient: check})}
-          onChangeSlider={(value) => this.setState({comparisonMargin: value})} value={this.state.comparisonMargin}/>
-          
+          <GradientSelector
+            checked={this.state.showGradient}
+            onChangeSwitch={(check) => this.setState({ showGradient: check })}
+            onChangeSlider={(value) =>
+              this.setState({ comparisonMargin: value })
+            }
+            value={this.state.comparisonMargin}
+          />
+
           <div id="second">
             <DragDropContext onDragEnd={this.onDragEnd}>
               {
@@ -359,7 +368,7 @@ class App extends React.Component {
             </DragDropContext>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 }

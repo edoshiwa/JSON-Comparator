@@ -5,6 +5,7 @@ import App from "./App.js";
 import BenchES from "./BenchES";
 import { Layout, Menu } from "antd";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import JsonComparator from "./JsonComparator";
 const { Header, Content } = Layout;
 
 ReactDOM.render(
@@ -26,7 +27,7 @@ ReactDOM.render(
             <Link to="/js">JS Benchmark</Link>
           </Menu.Item>
           <Menu.Item key="3" style={{ borderBottom: "none" }}>
-            <Link to="/php">PHP Benchmark</Link>
+            <Link to="/benchook">Benchmark comparator bis</Link>
           </Menu.Item>
         </Menu>
       </Header>
@@ -37,6 +38,9 @@ ReactDOM.render(
           </Route>
           <Route path="/js">
             <BenchES />
+          </Route>
+          <Route path="/benchook">
+            <JsonComparator/>
           </Route>
         </Switch>
       </Content>

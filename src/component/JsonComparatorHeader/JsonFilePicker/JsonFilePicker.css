@@ -1,0 +1,8 @@
+#first {
+  float: none; /* add this */
+  text-align: center;
+  color: rgb(41, 62, 81);
+  font-weight: 800;
+  font-size: 12pt;
+  font-family: "Source Sans Pro", sans-serif;
+}
