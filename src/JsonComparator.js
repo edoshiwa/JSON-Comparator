@@ -1,5 +1,3 @@
-/* eslint-disable require-jsdoc */
-/* eslint-disable no-unused-vars */
 import React, { useEffect, useRef, useState } from "react";
 import { Divider } from "antd";
 import FileMenu from "./component/FileMenu/FileMenu";
@@ -11,8 +9,16 @@ import schema from "./json-schema.json";
 import Ajv from "ajv";
 import Table from "./Table.js";
 import uniqid from "uniqid";
+/**
+ * JsonComparator is the main component for the JSON comparison page.
+ * Don't forget to adjust the constant file if needed.
+ * @return {*} a file picker, a table with selected JSON and options
+ */
 export default function JsonComparator() {
   const websocketServer = useRef(null);
+  /**
+   * Open WSS connection and parameters it
+   */
   useEffect(() => {
     websocketServer.current = new WebSocket(constants.webSocketUrl);
     websocketServer.current.onopen = () => {
@@ -37,11 +43,14 @@ export default function JsonComparator() {
         websocketServer.current = new WebSocket(constants.webSocketUrl);
       });
     };
-    return () => websocketServer.close();
+    return () => websocketServer.current.close();
   }, []);
   const [menu, setMenu] = useState({});
   const [menuIsDirty, setMenuIsDirty] = useState(true);
   const [lastTimeFetch, setLastTimeFetch] = useState(null);
+  /**
+   * FetchJsonList whenever the menu is dirty
+   */
   useEffect(() => {
     fetchJsonList();
   }, [menuIsDirty]);
@@ -49,6 +58,9 @@ export default function JsonComparator() {
   const [jsonArray, setJsonArray] = useState([]);
   const [jsonArrayHeader, setJsonArrayHeader] = useState([]);
   const [benchIdMap, setBenchIdMap] = useState(new Map());
+  /**
+   * Update the ID map whenever the selected JSON change
+   */
   useEffect(() => {
     const mapTmp = new Map();
     jsonArray.forEach((json) => {
@@ -65,6 +77,11 @@ export default function JsonComparator() {
   }, [jsonArray]);
   const [showGradient, setShowGradient] = useState(false);
   const [comparisonMargin, setComparisonMargin] = useState(99);
+  /**
+   * Fetch again the JSON list if menuIsDirty or if the WSS connection is closed
+   * and the menu hasn't been update in the last 5 second.
+   * Else it will just refrech the Item Menu.
+   */
   const fetchJsonList = () => {
     if (
       menuIsDirty ||
@@ -102,6 +119,12 @@ export default function JsonComparator() {
       );
     }
   };
+  /**
+   * It will fetch the from the set Api the selected file
+   * @param {number} key : index of element in dropdown
+   * It will update the state by adding the new Json
+   * and its file to respectively jsonArray and jsonArrayHeader
+   */
   const menuOnClick = ({ key }) => {
     fetch(
       (constants.localUrl + constants.apiUrl + constants.urlParameters).concat(
@@ -114,6 +137,12 @@ export default function JsonComparator() {
         setJsonArrayHeader([...jsonArrayHeader, jsonFileName[key]]);
       });
   };
+  /**
+   * It will update the state of the class by deleting
+   * a JSON and its corresponding title, in both
+   * jsonArray and jsonArrayHeader states.
+   * @param {number} key : index of element in jsonArray or jsonArrayHeader
+   */
   const deleteJson = (key) => {
     const tmpJsonArray = [...jsonArray];
     const tmpJsonArrayHeader = [...jsonArrayHeader];
@@ -122,6 +151,11 @@ export default function JsonComparator() {
     setJsonArray(tmpJsonArray);
     setJsonArrayHeader(tmpJsonArrayHeader);
   };
+  /**
+   * It will swap in state two JSON and their corresponding title.
+   * @param {number} a the index of the first JSON
+   * @param {number} b the index of the second JSON
+   */
   const swapJson = (a, b) => {
     const tmpArray = [...jsonArray];
     const tmpArrayH = [...jsonArrayHeader];
@@ -130,6 +164,10 @@ export default function JsonComparator() {
     setJsonArray(tmpArray);
     setJsonArrayHeader(tmpArrayH);
   };
+  /**
+   * Callback function when a draggable has been dropped in a droppable area
+   * @param {*} result data about the DnD context
+   */
   const onDragEnd = (result) => {
     const { destination, source } = result;
     // if there is no destination, there is no change to do
@@ -162,6 +200,12 @@ export default function JsonComparator() {
     setJsonArray(arr);
     setJsonArrayHeader(header);
   };
+  /**
+   * Handle file that are pass into the browser.
+   * Everything happend locally. It will save them the same way
+   * as there way fetched via api.
+   * @param {*} e change event from file upload selector
+   */
   const handleUploadedFiles = async (e) => {
     for (let index = 0; index < e.target.files.length; index++) {
       const files = [...jsonArray];
