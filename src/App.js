@@ -12,7 +12,7 @@ import JsonFilePicker from "./component/JsonComparatorHeader/JsonFilePicker/Json
 
 const uniqid = require("uniqid");
 const webSocketUrl = "ws://localhost:8080/";
-const localUrl = "http://localhost/easyvista/";
+const localUrl = "http://localhost/easyvista_training/";
 const apiUrl = "comparator/api.php";
 const urlParameters = "?name=";
 /**

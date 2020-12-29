@@ -262,6 +262,7 @@ const renderTableInformation = (map) => {
  * @param {*} jsons all charged jsons
  * @return {*} list of sorted array for each benchmark from the fastest/lighter bench to the slowest/heavier
  */
+// eslint-disable-next-line no-unused-vars
 const ranking = (map, jsons) => {
   const ranksTime = [];
   const ranksSize = [];
@@ -276,40 +277,30 @@ const ranking = (map, jsons) => {
         }
       });
     });
-    console.log();
-    // unsortedResult.map((e) => console.log(e));
     ranksSize[key] = [...unsortedResult.sort((a, b) => a.size - b.size)];
-    /* ranksSize[key] = unsortedResult
-      .sort(function (a, b) {
-        return a.size - b.size;
-      })
-      .slice();*/
-    ranksTime[key] = unsortedResult.sort(function (a, b) {
-      return a.time - b.time;
-    });
+    ranksTime[key] = [...unsortedResult.sort((a, b) => a.time - b.time)];
   });
-  console.log("ranking : ");
-  console.log(ranksSize);
-  console.log(ranksTime);
   return [ranksTime, ranksSize];
 };
 
 const Table = (props) => {
   // Destructuring props
-  const { thead, jsons, benchIdMap, showGradient, comparisonMargin } = props;
+  const {
+    thead,
+    jsons,
+    benchIdMap,
+    showGradient,
+    comparisonMargin,
+    ranks,
+  } = props;
   const benchs = [];
   jsons.forEach((e) => benchs.push(e.bench));
-  // console.log(benchIdMap.length);
   const map = new Map();
   if (benchIdMap != null) {
-    // benchIdMap.forEach((element) => console.log(element));
     benchIdMap.forEach((element, key) => map.set(key, element));
   }
-  const [ranksTime, ranksSize] = ranking(benchIdMap, jsons);
-  // benchs.forEach((el) => keyMap(map, el));
-  // map.forEach((element) => console.log(element));
+  const { timeRanks, sizeRanks } = ranks;
   const deleteColumn = (key) => {
-    console.log("deleting colum :" + key);
     props.deleteJson(key);
   };
   const swapColumn = (a, b) => {
@@ -331,8 +322,8 @@ const Table = (props) => {
                   json={json}
                   index={index}
                   map={map}
-                  ranksTime={ranksTime}
-                  ranksSize={ranksSize}
+                  ranksTime={timeRanks}
+                  ranksSize={sizeRanks}
                   theadLength={thead.length}
                   deleteColumn={deleteColumn}
                   swapColumn={swapColumn}

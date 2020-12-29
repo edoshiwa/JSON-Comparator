@@ -55,15 +55,24 @@ export default function JsonComparator() {
     fetchJsonList();
   }, [menuIsDirty]);
   const [jsonFileName, setJsonFileName] = useState([]);
-  const [jsonArray, setJsonArray] = useState([]);
-  const [jsonArrayHeader, setJsonArrayHeader] = useState([]);
+  const [jsons, setJsons] = useState({ jsonArray: [], jsonArrayHeader: [] });
+  const [ranks, setRanks] = useState({ timeRanks: [], sizeRanks: [] });
   const [benchIdMap, setBenchIdMap] = useState(new Map());
   /**
    * Update the ID map whenever the selected JSON change
+   * TODO : Voir quand useEffect est appellé
    */
   useEffect(() => {
+    setBenchIdMap(mapUpdate());
+  }, [jsons]);
+
+  const [gradient, setGradient] = useState({
+    showGradient: false,
+    comparisonMargin: 99,
+  });
+  const mapUpdate = (jsonsTmp = jsons.jsonArray) => {
     const mapTmp = new Map();
-    jsonArray.forEach((json) => {
+    jsonsTmp.forEach((json) => {
       for (const benchmark in json.bench) {
         if (!mapTmp.has(json.bench[benchmark].id)) {
           mapTmp.set(
@@ -73,10 +82,8 @@ export default function JsonComparator() {
         }
       }
     });
-    setBenchIdMap(mapTmp);
-  }, [jsonArray]);
-  const [showGradient, setShowGradient] = useState(false);
-  const [comparisonMargin, setComparisonMargin] = useState(99);
+    return mapTmp;
+  };
   /**
    * Fetch again the JSON list if menuIsDirty or if the WSS connection is closed
    * and the menu hasn't been update in the last 5 second.
@@ -97,7 +104,7 @@ export default function JsonComparator() {
             setMenu(
               <FileMenu
                 arr={responseJSON}
-                jsonArrayHeader={jsonArrayHeader}
+                jsonArrayHeader={jsons.jsonArrayHeader}
                 onClick={menuOnClick}
               />
             );
@@ -113,7 +120,7 @@ export default function JsonComparator() {
       setMenu(
         <FileMenu
           arr={jsonFileName}
-          jsonArrayHeader={jsonArrayHeader}
+          jsonArrayHeader={jsons.jsonArrayHeader}
           onClick={menuOnClick}
         />
       );
@@ -133,8 +140,10 @@ export default function JsonComparator() {
     )
       .then((response) => response.json())
       .then((responseJSON) => {
-        setJsonArray([...jsonArray, responseJSON]);
-        setJsonArrayHeader([...jsonArrayHeader, jsonFileName[key]]);
+        const tab = [...jsons.jsonArray, responseJSON];
+        const tabHeader = [...jsons.jsonArrayHeader, jsonFileName[key]];
+        ranking(tab);
+        setJsons({ ...jsons, jsonArray: tab, jsonArrayHeader: tabHeader });
       });
   };
   /**
@@ -144,12 +153,16 @@ export default function JsonComparator() {
    * @param {number} key : index of element in jsonArray or jsonArrayHeader
    */
   const deleteJson = (key) => {
-    const tmpJsonArray = [...jsonArray];
-    const tmpJsonArrayHeader = [...jsonArrayHeader];
+    const tmpJsonArray = [...jsons.jsonArray];
+    const tmpJsonArrayHeader = [...jsons.jsonArrayHeader];
     tmpJsonArray.splice(key, 1);
     tmpJsonArrayHeader.splice(key, 1);
-    setJsonArray(tmpJsonArray);
-    setJsonArrayHeader(tmpJsonArrayHeader);
+    ranking(tmpJsonArray);
+    setJsons({
+      ...jsons,
+      jsonArray: tmpJsonArray,
+      jsonArrayHeader: tmpJsonArrayHeader,
+    });
   };
   /**
    * It will swap in state two JSON and their corresponding title.
@@ -157,12 +170,11 @@ export default function JsonComparator() {
    * @param {number} b the index of the second JSON
    */
   const swapJson = (a, b) => {
-    const tmpArray = [...jsonArray];
-    const tmpArrayH = [...jsonArrayHeader];
+    const tmpArray = [...jsons.jsonArray];
+    const tmpArrayH = [...jsons.jsonArrayHeader];
     [tmpArray[a], tmpArray[b]] = [tmpArray[b], tmpArray[a]];
     [tmpArrayH[a], tmpArrayH[b]] = [tmpArrayH[b], tmpArrayH[a]];
-    setJsonArray(tmpArray);
-    setJsonArrayHeader(tmpArrayH);
+    setJsons({ ...jsons, jsonArray: tmpArray, jsonArrayHeader: tmpArrayH });
   };
   /**
    * Callback function when a draggable has been dropped in a droppable area
@@ -183,8 +195,8 @@ export default function JsonComparator() {
     }
     // We want to shift the dragged element at the right destination
     // We save the current state
-    const arr = [...jsonArray];
-    const header = [...jsonArrayHeader];
+    const arr = [...jsons.jsonArray];
+    const header = [...jsons.jsonArrayHeader];
     // We save the dragged element in a tmp value
     const tmp = arr[source.index];
     // We delete the dragged element from the saved current state
@@ -197,8 +209,7 @@ export default function JsonComparator() {
     header.splice(source.index, 1);
     header.splice(destination.index, 0, tmp2);
     // we update the state and the component refresh
-    setJsonArray(arr);
-    setJsonArrayHeader(header);
+    setJsons({ ...jsons, jsonArray: arr, jsonArrayHeader: header });
   };
   /**
    * Handle file that are pass into the browser.
@@ -208,8 +219,8 @@ export default function JsonComparator() {
    */
   const handleUploadedFiles = async (e) => {
     for (let index = 0; index < e.target.files.length; index++) {
-      const files = [...jsonArray];
-      const filesName = [...jsonArrayHeader];
+      const files = [...jsons.jsonArray];
+      const filesName = [...jsons.jsonArrayHeader];
       // push file name into the array without the .json extension
       filesName.push(
         e.target.files[index].name.split(".").slice(0, -1).join(".")
@@ -227,12 +238,37 @@ export default function JsonComparator() {
         if (!valid) console.log(validate.errors);
         else {
           files.push(jsonTest);
-          setJsonArray(files);
-          setJsonArrayHeader(filesName);
+          ranking(files);
+          setJsons({ ...jsons, jsonArray: files, jsonArrayHeader: filesName });
         }
       };
       reader.readAsText(e.target.files[index]);
     }
+  };
+  /**
+   * Order, row by row, the fastest to slowest benchmark
+   * @param {*} jsons
+   */
+  const ranking = (jsons) => {
+    console.log("Appel : fonction de ranking");
+    const mapTmp = mapUpdate(jsons);
+    const ranksTime = [];
+    const ranksSize = [];
+    mapTmp.forEach((elementMap, key) => {
+      const unsortedResult = [];
+
+      jsons.map((json, index) => {
+        json.bench.map((benchmark) => {
+          if (benchmark.id === key) {
+            benchmark["index"] = index;
+            unsortedResult.push(benchmark);
+          }
+        });
+      });
+      ranksSize[key] = [...unsortedResult.sort((a, b) => a.size - b.size)];
+      ranksTime[key] = [...unsortedResult.sort((a, b) => a.time - b.time)];
+    });
+    setRanks({ ...ranks, timeRanks: ranksTime, sizeRanks: ranksSize });
   };
   return (
     <>
@@ -241,27 +277,32 @@ export default function JsonComparator() {
       <JsonFilePicker
         menu={menu}
         disabled={menu === {}}
-        fetchJsonList={() => fetchJsonList()}
+        fetchJsonList={fetchJsonList}
         handleUploadedFiles={handleUploadedFiles}
       />
       <Divider />
       <GradientSelector
-        checked={showGradient}
-        onChangeSwitch={(check) => setShowGradient(check)}
-        onChangeSlider={(val) => setComparisonMargin(val)}
-        value={comparisonMargin}
+        checked={gradient.showGradient}
+        onChangeSwitch={(check) =>
+          setGradient({ ...gradient, showGradient: check })
+        }
+        onChangeSlider={(val) =>
+          setGradient({ ...gradient, comparisonMargin: val })
+        }
+        value={gradient.comparisonMargin}
       />
       <DragDropContext onDragEnd={onDragEnd}>
         {
           <Table
-            comparisonMargin={comparisonMargin}
-            showGradient={showGradient}
+            comparisonMargin={gradient.comparisonMargin}
+            showGradient={gradient.showGradient}
             key={uniqid()}
-            thead={jsonArrayHeader}
-            jsons={jsonArray}
+            thead={jsons.jsonArrayHeader}
+            jsons={jsons.jsonArray}
             deleteJson={deleteJson}
             swapJson={swapJson}
             benchIdMap={benchIdMap}
+            ranks={ranks}
           />
         }
       </DragDropContext>
