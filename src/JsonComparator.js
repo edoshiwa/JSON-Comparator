@@ -97,7 +97,11 @@ export default function JsonComparator() {
     ) {
       if (menuIsDirty) console.log("FETCHING BC MENU DIRTY");
       else console.log("MORE THAN 5 SEC SINCE LAST FETCH");
-      fetch(constants.localUrl + constants.apiUrl)
+      fetch(
+        constants.apiUrl +
+          constants.benchCollection +
+          constants.apiQueryOnlyFilename
+      )
         .then((response) => response.json())
         .then(
           (responseJSON) => {
@@ -134,9 +138,11 @@ export default function JsonComparator() {
    */
   const menuOnClick = ({ key }) => {
     fetch(
-      (constants.localUrl + constants.apiUrl + constants.urlParameters).concat(
-        jsonFileName[key]
-      )
+      (
+        constants.apiUrl +
+        constants.benchCollection +
+        constants.urlSeparator
+      ).concat(jsonFileName[key])
     )
       .then((response) => response.json())
       .then((responseJSON) => {
@@ -174,6 +180,8 @@ export default function JsonComparator() {
     const tmpArrayH = [...jsons.jsonArrayHeader];
     [tmpArray[a], tmpArray[b]] = [tmpArray[b], tmpArray[a]];
     [tmpArrayH[a], tmpArrayH[b]] = [tmpArrayH[b], tmpArrayH[a]];
+    // TODO remplacer tmpArray par meme ligne qu'au dessus
+    ranking(tmpArray);
     setJsons({ ...jsons, jsonArray: tmpArray, jsonArrayHeader: tmpArrayH });
   };
   /**

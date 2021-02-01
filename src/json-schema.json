@@ -14,8 +14,8 @@
       "description": "Benchmark platform information",
       "type": "object",
       "additionalProperties": { "type": "string" },
-      "maxProperties": 4,
-      "required": ["type", "OS", "uname", "version"]
+      "maxProperties": 5,
+      "required": ["type", "OS", "uname", "version", "language"]
     },
     "unit": {
       "description": "Units of the results",

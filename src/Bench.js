@@ -309,6 +309,7 @@ export function benchInfo() {
     OS: navigator.platform,
     uname: navigator.userAgent,
     version: navigator.appVersion,
+    language: "JS",
   };
   const unit = {
     size: "octet",
